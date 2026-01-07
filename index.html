@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RibaRun - Industrial Chaos</title>
+    <style>
+        body { margin: 0; background-color: #202020; font-family: 'Courier New', Courier, monospace; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        canvas { border: 4px solid #4ade80; background: linear-gradient(to bottom, #87CEEB, #E0F6FF); box-shadow: 0 0 20px rgba(74, 222, 128, 0.2); }
+        
+        /* UI OVERLAYS */
+        #startOverlay, #gameOverOverlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); z-index: 50; flex-direction: column; }
+        #gameOverOverlay { display: none; background: rgba(0,0,0,0.85); color: #fff; }
+        #playButton { background: #4ade80; border: none; color: #012; font-weight: bold; padding: 18px 32px; font-size: 28px; border-radius: 8px; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,0.3); }
+        #countdown { margin-top: 18px; font-size: 64px; color: #fff; font-weight: bold; text-shadow: 0 2px 6px rgba(0,0,0,0.6); }
+        #gameOverCard { background: #111; padding: 28px; border-radius: 12px; text-align: center; min-width: 320px; border: 1px solid #333; }
+        .gameOverBtn { margin: 8px 6px; padding: 10px 16px; font-size: 16px; border-radius: 8px; border: none; cursor: pointer; }
+        .primary { background: #4ade80; color: #022; } 
+        .secondary { background: #e2e8f0; color: #022; } 
+        .ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); } 
+        .gameOverBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <div id="startOverlay">
+        <button id="playButton">START RUN</button>
+        <div id="countdown"></div>
+    </div>
+
+    <div id="gameOverOverlay">
+        <div id="gameOverCard">
+            <h2 style="color: #ff4d4d; font-size: 32px; margin-top:0;">LIQUIDITY CRISIS</h2>
+            <p id="gameOverText">You ran out of money.</p>
+            <div style="margin-top:20px">
+                <button id="btnLoan" class="gameOverBtn primary">TAKE LOAN (+£100)</button><br>
+                <small style="color:#aaa;">(Warning: Increases Burn Rate)</small><br><br>
+                <button id="btnSavings" class="gameOverBtn secondary">USE SAVINGS (-£150)</button><br>
+                <button id="btnGiveUp" class="gameOverBtn ghost">DECLARE BANKRUPTCY</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const birdImage = new Image(); birdImage.src = 'https://gcdnb.pbrd.co/images/WoqvA047BYC9.png?o=1';
+
+        // ==========================================
+        //        THE GOD PANEL
+        // ==========================================
+
+        let gameSpeed = 7;           
+        const MAX_SPEED = 19;        
+        const ACCELERATION = 0.005;  
+        
+        let verticalSpeed = 0.25;   
+        
+        let liquidity = 100.00;     
+        let savings = 0.00;         
+        let burnRate = 6;          
+        
+        const INFLATION_MULT = 0.0008; 
+
+        const COIN_VALUE = 2;       
+        const CHAOS_CHANCE = 0.12;   // 12% Chance a coin becomes an Obstacle
+        const KESTRL_DURATION = 360;
+        const POWERUP_CHANCE = 0.020;
+        const SADAQAH_DURATION = 360; // 6 Seconds
+        const SADAQAH_COST = 30;        // Cost to buy
+        const SADAQAH_ROI = 100;         // Max money to collect (3x)
+        const CHARGE_TIME = 120;        // 2 Seconds (60 * 2)
+        // ==========================================
+        //  THE INDUSTRIAL GRADE FORMATIONS
+        // ==========================================
+        const FORMATIONS = [
+            // --- HIGH FREQUENCY NOISE ---
+            // 1. The Shotgun
+            { rows: [[1, 0, 1, 0, 1], [0, 1, 0, 1, 0], [1, 0, 1, 0, 1]] },
+            // 2. The Guillotine
+            { rows: [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [0, 0, 0, 0, 0]] },
+            // 3. The Floor is Lava
+            { rows: [[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]] },
+
+            // --- ENDURANCE SEQUENCES ---
+            // 4. The Sine Wave
+            { rows: [[0,0,1,1,0,0,0,0,0,0], [0,1,0,0,1,0,0,1,0,0], [1,0,0,0,0,1,1,0,1,1]] },
+            // 5. The Tunnel
+            { rows: [[1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1]] },
+            // 6. The Great Wall (High Risk/Reward)
+            { rows: [[1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1]] },
+            // 7. The DNA Helix
+            { rows: [[1, 0, 0, 1, 0, 0, 1, 0], [0, 1, 1, 0, 1, 1, 0, 1], [1, 0, 0, 1, 0, 0, 1, 0]] },
+            // 8. The Staircase to Hell
+            { rows: [[0,0,0,0,1,1,0,0,0,0], [0,0,1,1,0,0,1,1,0,0], [1,1,0,0,0,0,0,0,1,1]] },
+            // 9. The Sparse Filter (Rest)
+            { rows: [[0, 0, 0, 1, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 1]] }
+        ];
+
+        let isPlaying = false;
+        let isGameOver = false;
+        let frameCount = 0;
+        let bgOffset = 0;
+        let drunkFrames = 0; 
+        let gamblingFrames = 0;
+        let toxicFrames = 0;
+        let shakeFrames = 0;
+        let kestrlFrames = 0;
+        let magnetActive = false;       // Is the magnet actually ON?
+        let magnetCharging = 0;         // The 2-second delay timer
+        let magnetCap = 0;              // The "3x ROI" money counter
+        let maxDrunkDuration = 0; 
+        let flyingCoins = [];           // Stores the visual coins flying to savings
+        let coins = []; 
+        let currentPattern = null;
+        let patternColIndex = 0;
+        let spawnTimer = 0;
+        let ribaMode = false;           // Are we in debt?
+        let ribaRound = 0;              // How many loans taken?
+        let inputQueue = [];            // Stores delayed key presses
+        let pixelsTraveled = 0; // Tracks distance for consistent gaps
+        const SPAWN_GAP = 110;  // Pixels between every column
+        const LANES = [150, 300, 450]; 
+        const RIBA_SPEED_CAP = 16;      // Speed limit during debt
+        const MONSTER_X = 50;           // Monster stays on left
+
+        const bird = {
+            x: 75, y: LANES[1], targetY: LANES[1], size: 80, neutralX: 100,
+            
+            update: function() {
+                this.y += (this.targetY - this.y) * verticalSpeed;
+                let distY = Math.abs(this.targetY - this.y);
+                let targetX = this.neutralX;
+                if (distY > 5) targetX = this.neutralX - 20; 
+                this.x += (targetX - this.x) * 0.1;
+            },
+
+            draw: function() {
+                // --- KESTRL GOLD GLOW ---
+                if (kestrlFrames > 0) {
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = "#FFD700"; // Gold Glow
+                    ctx.fillStyle = "rgba(255, 215, 0, 0.3)"; // Semi-transparent gold circle
+                    ctx.beginPath();
+                    ctx.arc(this.x + 30, this.y, this.size/1.5, 0, Math.PI*2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0; // Reset so other things don't glow
+                }
+                if (kestrlFrames > 0) {
+                    // 1. Calculate percentage (0.0 to 1.0)
+                    let pct = kestrlFrames / KESTRL_DURATION;
+                    
+                    // 2. Draw Background (Black)
+                    ctx.fillStyle = "black";
+                    ctx.fillRect(this.x - 40, this.y + 50, 80, 10);
+
+                    // 3. Draw Progress (Green)
+                    ctx.fillStyle = "#4ade80";
+                    ctx.fillRect(this.x - 38, this.y + 52, 76 * pct, 6);
+                }
+                // --- SADAQAH BAR (Blue - 2 Phases) ---
+                if (magnetCharging > 0) {
+                    // PHASE 1: FILLING UP (Charging)
+                    // We invert the pct so it goes 0 -> 1
+                    let pct = 1 - (magnetCharging / CHARGE_TIME);
+                    
+                    ctx.fillStyle = "black"; ctx.fillRect(this.x - 30, this.y + 60, 60, 8);
+                    ctx.fillStyle = "#3b82f6"; // Blue
+                    ctx.fillRect(this.x - 29, this.y + 61, 58 * pct, 6);
+                } 
+                else if (magnetActive) {
+                    // PHASE 2: DRAINING (Cap Based)
+                    let pct = magnetCap / SADAQAH_ROI;
+                    
+                    ctx.fillStyle = "black"; ctx.fillRect(this.x - 30, this.y + 60, 60, 8);
+                    ctx.fillStyle = "#3b82f6"; // Blue
+                    ctx.fillRect(this.x - 29, this.y + 61, 58 * pct, 6);
+                }
+
+                ctx.drawImage(birdImage, this.x, this.y - this.size/2, this.size, this.size);
+            }
+        };
+
+        class Coin {
+            constructor(row, type) {
+                this.y = LANES[row];
+                this.x = canvas.width + 50;
+                this.size = 30;
+                this.type = type; 
+                // Type 1: Gold
+                // Type 2: Alcohol
+                // Type 3: Gambling
+                // Type 4: Toxic Waste
+                // Type 5: Military
+                this.collected = false;
+            }
+            update() { this.x -= gameSpeed; }
+            draw() {
+                if (this.collected) return;
+
+                // 1. GHOST EFFECT SETUP
+                // If Shield is ON and this is a Trap (Type 2-5)
+                // Set transparency to 0.2 (Very faded)
+                let isGhost = (kestrlFrames > 0 && this.type >= 2 && this.type <= 5);
+                
+                if (isGhost) {
+                    ctx.save(); // Freeze current settings
+                    ctx.globalAlpha = 0.2; // 20% Opacity (Ghost Mode)
+                    // Optional: Make it grey-ish by applying a filter
+                    // ctx.filter = "grayscale(100%)"; 
+                }
+
+                if (this.type === 1) { // GOLD
+                    // Double Coin Visual if Shield Active
+                    if (kestrlFrames > 0) {
+                        ctx.fillStyle = "#FFD700";
+                        // Changed -5 to -35 to separate them
+                        ctx.beginPath(); ctx.arc(this.x - 35, this.y, 20, 0, Math.PI * 2); ctx.fill(); 
+                    }
+                    // Normal Coin
+                    ctx.fillStyle = "#FFD700";
+                    ctx.beginPath(); ctx.arc(this.x, this.y, 20, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = "#DAA520"; ctx.font = "bold 20px Arial"; ctx.fillText("£", this.x - 6, this.y + 7);
+                } 
+                else if (this.type === 2) { // ALCOHOL
+                    ctx.fillStyle = "#22c55e"; 
+                    ctx.fillRect(this.x - 15, this.y - 25, 30, 50);
+                    ctx.fillStyle = "#fff"; ctx.font = "bold 14px Arial"; ctx.fillText("HRM", this.x-15, this.y+5);
+                }
+                else if (this.type === 3) { // GAMBLING
+                    ctx.fillStyle = "#ef4444"; 
+                    ctx.fillRect(this.x - 20, this.y - 20, 40, 40);
+                    ctx.fillStyle = "#fff"; ctx.font = "bold 24px Arial"; ctx.fillText("?", this.x - 8, this.y + 8);
+                }
+                else if (this.type === 4) { // TOXIC
+                    ctx.fillStyle = "#800080"; 
+                    ctx.fillRect(this.x - 20, this.y - 15, 40, 30);
+                    ctx.fillStyle = "#7cfc00"; ctx.font = "bold 12px Arial"; ctx.fillText("TOX", this.x - 12, this.y + 5);
+                }
+                else if (this.type === 5) { // MILITARY
+                    ctx.fillStyle = "#2F4F4F"; 
+                    ctx.beginPath(); ctx.arc(this.x, this.y, 22, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = "#FF0000"; ctx.font = "bold 18px Arial"; ctx.fillText("💣", this.x - 10, this.y + 6);
+                }
+                else if (this.type === 6) { // KESTRL CARD
+                    // Black Card with Green Border
+                    ctx.fillStyle = "#000"; 
+                    ctx.fillRect(this.x - 25, this.y - 18, 50, 36);
+                    ctx.strokeStyle = "#4ade80"; ctx.lineWidth = 3;
+                    ctx.strokeRect(this.x - 25, this.y - 18, 50, 36);
+                    ctx.fillStyle = "#4ade80"; ctx.font = "bold 24px Arial"; ctx.fillText("K", this.x - 8, this.y + 8);
+                }
+                else if (this.type === 7) { // SADAQAH BOX
+                    ctx.fillStyle = "#3b82f6"; // Blue
+                    ctx.fillRect(this.x - 20, this.y - 15, 40, 30);
+                    ctx.fillStyle = "#fff"; ctx.font = "bold 16px Arial"; ctx.fillText("BOX", this.x - 15, this.y + 5);
+                }
+                if (isGhost) {
+                    ctx.restore(); // Unfreeze settings (Opacity goes back to 1.0)
+                }
+            }
+        }
+        // --- VISUAL EFFECT: MONEY TRANSFER ---
+        class TransferCoin {
+            constructor() {
+                this.startX = 180;      // Starts at Liquidity Box (Left)
+                this.startY = 65;
+                this.endX = 600;        // Ends at Savings Box (Right)
+                this.endY = 65;
+                
+                this.progress = 0;
+                this.finished = false;
+            }
+
+            update() {
+                // 1. Move progress from 0.0 to 1.0
+                this.progress += 0.05; // Speed of the toss
+                
+                if (this.progress >= 1) {
+                    this.progress = 1;
+                    this.finished = true;
+                }
+
+                // 2. Math for the Arc (Linear X, Sine Wave Y)
+                // This moves X steadily, but Y dips down 150px and comes back up
+                this.x = this.startX + (this.endX - this.startX) * this.progress;
+                
+                let arcDrop = Math.sin(this.progress * Math.PI) * 150; 
+                this.y = this.startY + arcDrop; 
+            }
+
+            draw() {
+                // Draw a gold coin
+                ctx.shadowBlur = 10; ctx.shadowColor = "gold";
+                ctx.fillStyle = "#FFD700";
+                ctx.beginPath(); ctx.arc(this.x, this.y, 12, 0, Math.PI * 2); ctx.fill();
+                
+                // Draw the £ symbol
+                ctx.fillStyle = "#B8860B"; 
+                ctx.font = "bold 14px Arial"; 
+                ctx.fillText("£", this.x - 4, this.y + 5);
+                ctx.shadowBlur = 0;
+            }
+        }
+        // --- THE SPAWNER ---
+        function handleSpawning() {
+            // 1. Track how far the world has moved this frame
+            pixelsTraveled += gameSpeed;
+
+            // 2. Wait until we have moved enough pixels (110px)
+            if (pixelsTraveled < SPAWN_GAP) return;
+
+            // 3. Reset the tracker (subtract the gap so we don't lose precision)
+            pixelsTraveled -= SPAWN_GAP;
+
+            // --- Standard Pattern Logic Below ---
+
+            if (spawnTimer > 0) { spawnTimer--; return; }
+
+            if (!currentPattern) {
+                let r = Math.floor(Math.random() * FORMATIONS.length);
+                currentPattern = FORMATIONS[r];
+                patternColIndex = 0;
+            }
+
+            // We removed the "frameCount % 18" check because the 
+            // "pixelsTraveled" check at the top handles the timing now.
+            
+            for (let row = 0; row < 3; row++) {
+                let shouldSpawn = currentPattern.rows[row][patternColIndex] === 1;
+                if (shouldSpawn) {
+                    
+                    // --- DIFFICULTY LOGIC ---
+                    // Normal Chance: 12%
+                    // Riba Mode Chance: 6% (Easier world, harder controls)
+                    let currentChaos = (ribaMode) ? 0.05 : CHAOS_CHANCE; 
+
+                    let isEvil = Math.random() < currentChaos;
+
+                    let type = 1; 
+                    
+                    if (isEvil) {
+                        let roll = Math.random(); 
+                        if (roll < 0.25) type = 2;       // Alcohol
+                        else if (roll < 0.50) type = 3;  // Gambling
+                        else if (roll < 0.75) type = 4;  // Toxic
+                        else type = 5;                   // Military
+                    
+                    } else {
+                        // 1. Only spawn if we don't already have the shield
+                        if (kestrlFrames <= 0) {
+                            
+                            // 2. Scale probability by speed
+                            // At speed 6: Chance is 5%
+                            // At speed 12: Chance is 2.5%
+                            // At speed 18: Chance is 1.6%
+                            let chance = POWERUP_CHANCE * (6 / gameSpeed);
+                            
+                            if (Math.random() < chance) {
+                                // 3. THE 50/50 SPLIT
+                                // Roll a new dice just for this choice
+                                let splitRoll = Math.random();
+                                
+                                // Dynamic Threshold:
+                                // If Riba Mode: 0.80 (80% Box / 20% Card) - Harder to find the cure!
+                                // Normal Mode: 0.50 (50% Box / 50% Card) - Fair chance
+                                let threshold = (ribaMode) ? 0.80 : 0.50;
+                                
+                                if (splitRoll < threshold) { 
+                                    type = 7; // SADAQAH BOX
+                                } else {
+                                    type = 6; // 50% Chance = KESTRL CARD
+                                }
+                            }
+                        }
+                    }
+                    coins.push(new Coin(row, type)); 
+                }
+            }
+            
+            patternColIndex++;
+            if (patternColIndex >= currentPattern.rows[0].length) {
+                currentPattern = null;
+                // Set cooldown to 0 so the next pattern starts immediately 
+                // after the distance gap is met
+                spawnTimer = 0; 
+            }
+        }
+
+        // --- GAME LOOP ---
+        function loop() {
+            if (!isPlaying || isGameOver) return;
+            // A. Define the Limit (20 normally, 17 in Riba Mode)
+            let speedLimit = (ribaMode) ? RIBA_SPEED_CAP : MAX_SPEED;
+            // 1. MATH & PHYSICS (Updated with "Goldilocks Zone")
+            if (gameSpeed < speedLimit) { 
+                let currentAccel = ACCELERATION;
+                // If speed is between 10 and 14, slow down acceleration (The Vibe Zone)
+                if (gameSpeed > 0 && gameSpeed < 9) {
+                    currentAccel = ACCELERATION * 1.3; 
+                }
+                if (gameSpeed > 9 && gameSpeed < 11) {
+                    currentAccel = ACCELERATION * 1.4; 
+                }
+                if (gameSpeed > 13 && gameSpeed < 15) {
+                    currentAccel = ACCELERATION * 0.1;
+                }
+                if (gameSpeed > 16 && gameSpeed < 18) {
+                    currentAccel = ACCELERATION * 0.2;
+                }
+                gameSpeed += currentAccel; 
+            }
+            // If we just took a loan and are too fast, slow down to 17
+            else if (gameSpeed > speedLimit) {
+                gameSpeed -= 0.1; 
+            }
+            // ------------------------------
+            
+            // --- NEW: PROCESS INPUTS ---
+            processInputQueue(); // <--- Check if any delayed moves need to happen now
+
+            // --- SADAQAH LOGIC ---
+            // A. CHARGING PHASE
+            if (magnetCharging > 0) {
+                magnetCharging--;
+                if (magnetCharging === 0) {
+                    // Charging Complete! Turn Magnet ON.
+                    magnetActive = true;
+                    magnetCap = SADAQAH_ROI; // Set the limit to £30
+                }
+            }
+            // B. ACTIVE PHASE (Check if empty)
+            if (magnetActive && magnetCap <= 0) {
+                magnetActive = false; // Turn off if we hit the limit
+            }
+            
+            
+            burnRate += INFLATION_MULT;
+            liquidity -= (burnRate / 60);
+            if (liquidity <= -1) triggerGameOver();
+
+            // --- GAMBLING ROULETTE LOGIC ---
+            if (gamblingFrames > 0) {
+                gamblingFrames--;
+                
+                // Every 5 frames, switch to a random lane
+                // This creates the "Bom-Bom-Bom" flicker effect
+                if (gamblingFrames % 5 === 0) {
+                    let r = Math.floor(Math.random() * 3);
+                    bird.targetY = LANES[r];
+                }
+            }
+            
+            bird.update();
+            handleSpawning();
+
+            // 2. CLEAR SCREEN
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 3. --- START CAMERA EFFECTS (The Top Bread) ---
+            ctx.save(); 
+            
+            // Effect: MILITARY SHAKE
+            if (shakeFrames > 0) {
+                shakeFrames--;
+                let dx = (Math.random() - 0.5) * 30; // Random X movement
+                let dy = (Math.random() - 0.5) * 40; // Random Y movement
+                ctx.translate(dx, dy); // Move the whole world
+            }
+
+            // Effect: DRUNK WOBBLE
+            if (drunkFrames > 0) {
+                drunkFrames--;
+                let intensity = drunkFrames / maxDrunkDuration; 
+                let rotation = Math.sin(frameCount * 0.1) * 0.1 * 1.25 * intensity;
+                let scale = 1 + (Math.sin(frameCount * 0.2) * 0.1 * intensity);
+                
+                ctx.translate(canvas.width/2, canvas.height/2);
+                ctx.rotate(rotation);
+                ctx.scale(scale, scale);
+                ctx.translate(-canvas.width/2, -canvas.height/2);
+                
+                if(intensity > 0.5) ctx.filter = 'blur(2px)';
+            }
+
+            // Effect C: KESTRL SHIELD (The Missing Piece!)
+            if (kestrlFrames > 0) {
+                kestrlFrames--; // <--- THIS MAKES THE TIMER TICK DOWN
+                
+                // Draw Green Border
+                ctx.strokeStyle = "rgba(74, 222, 128, 0.5)"; 
+                ctx.lineWidth = 10;
+                ctx.strokeRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // 4. DRAW THE WORLD (This gets shaken)
+            drawBackground();
+            drawRibaMonster(); // <--- NEW: Draw the monster behind the coins
+            for (let i = coins.length - 1; i >= 0; i--) {
+                let c = coins[i];
+                // --- MAGNET PULL LOGIC ---
+                // If Magnet Active and this is a Gold Coin (Type 1)
+                if (magnetActive && c.type === 1) {
+                    // Move coin 10% closer to the bird every frame
+                    c.x += (bird.x - c.x) * 0.1; 
+                    c.y += (bird.y - c.y) * 0.1; 
+                }
+                // --- SADAQAH REPEL LOGIC (Add this if you haven't yet!) ---
+                if (magnetActive && c.type >= 2 && c.type <= 5) {
+                    if (Math.abs(bird.x - c.x) < 200) {
+                        if (c.y > bird.y) c.y += 4; 
+                        else c.y -= 4;              
+                    }
+                }
+                c.update();
+                c.draw();
+                if (c.x < -50) { coins.splice(i, 1); continue; }
+                let hitRange = (kestrlFrames > 0) ? 90 : 50;
+                if (!c.collected && Math.abs(bird.x - c.x) < hitRange && Math.abs(bird.y - c.y) < hitRange) {
+                    // --- NEW GHOST LOGIC STARTS HERE ---
+                    // If Shield is ON (Frames > 0) AND it is an Obstacle (Type 2-5)
+                    // Then STOP. Do not collect. Do not remove. Just ignore.
+                    if (kestrlFrames > 0 && c.type >= 2 && c.type <= 5) {
+                        continue; 
+                    }
+                    // --- NEW GHOST LOGIC ENDS HERE ---
+                    c.collected = true;
+                    applyCoinEffect(c); // <--- This triggers the shakeFrames variable
+                    // NEW: If Magnet is ON, subtract this coin from the Cap
+                    if (magnetActive && c.type === 1) {
+                        magnetCap -= COIN_VALUE; 
+                    }
+                    coins.splice(i, 1);
+                }
+            }
+
+            bird.draw();
+
+            // 5. --- END CAMERA EFFECTS (The Bottom Bread) ---
+            ctx.restore(); 
+
+            // 6. DRAW STATIC OVERLAYS (Stable on top)
+            
+            // Effect: TOXIC GREEN OVERLAY
+            if (toxicFrames > 0) {
+                toxicFrames--;
+                ctx.fillStyle = "rgba(0, 255, 0, 0.3)"; // Sick Green
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            // --- DRAW FLYING COINS (Transfer Effect) ---
+            for (let i = flyingCoins.length - 1; i >= 0; i--) {
+                let fc = flyingCoins[i];
+                fc.update();
+                fc.draw();
+                if (fc.finished) {
+                    flyingCoins.splice(i, 1); // Remove when it lands
+                }
+            }
+            drawUI();
+            
+            frameCount++;
+            requestAnimationFrame(loop);
+        }
+
+        function applyCoinEffect(c) {
+            
+            // --- KESTRL POWER-UP LOGIC ---
+            if (kestrlFrames > 0) {
+                // 1. If it's a Trap (Types 2-5), IGNORE IT!
+                if (c.type >= 2 && c.type <= 5) return;
+                
+                // 2. If it's Gold, DOUBLE IT!
+                if (c.type === 1) {
+                    liquidity += (COIN_VALUE * 2);
+                    return;
+                }
+            }
+            // -----------------------------
+
+            if (c.type === 1) { 
+                liquidity += COIN_VALUE;
+            } 
+            else if (c.type === 2) { 
+                liquidity -= 15;
+                drunkFrames = 180; 
+                maxDrunkDuration = 180;
+            } 
+            else if (c.type === 3) { 
+                liquidity -= 15;
+                gamblingFrames = 40; 
+            }
+            else if (c.type === 4) { 
+                liquidity -= 15; 
+                toxicFrames = 60; 
+            }
+            else if (c.type === 5) { 
+                liquidity -= 15; 
+                shakeFrames = 40; 
+            }
+            // --- ACTIVATE KESTRL CARD ---
+            else if (c.type === 6) { 
+                kestrlFrames = KESTRL_DURATION; // 10 Seconds
+            }
+            // --- SADAQAH BOX (New Logic) ---
+            else if (c.type === 7) {
+                // 1. Pay the Cost
+                liquidity -= SADAQAH_COST;
+                
+                // 2. Start the "Charging" Timer (2 Seconds)
+                magnetCharging = CHARGE_TIME;
+                magnetActive = false; // Not on yet!
+
+                // 3. Reset Cap (So it's ready for when it turns on)
+                magnetCap = SADAQAH_ROI;
+            }
+        }
+
+        function drawBackground() {
+            bgOffset -= gameSpeed;
+            if (bgOffset <= -800) bgOffset = 0;
+            ctx.strokeStyle = "rgba(255,255,255,0.6)";
+            ctx.lineWidth = 2; ctx.setLineDash([20, 20]);
+            LANES.forEach(y => {
+                ctx.lineDashOffset = -bgOffset; 
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(800, y); ctx.stroke();
+            });
+        }
+        function drawRibaMonster() {
+            if (!ribaMode) return;
+
+            // 1. MOVEMENT MATH
+            // Hover: Up and down slowly
+            let hover = Math.sin(frameCount * 0.05) * 10;
+            let myY = bird.y + hover; 
+
+            // Pulse: Grow and shrink (Heartbeat effect)
+            let pulse = Math.sin(frameCount * 0.1) * 5;
+
+            // Creep: Starts back (-30), gets 15px closer per Round, maxes out at 50px
+            let creep = Math.min(ribaRound * 15, 80); 
+            let myX = -30 + creep;
+
+            // 2. The Shadow Body (Pulsing Size)
+            ctx.shadowBlur = 40 + pulse; // Blur pulses too
+            ctx.shadowColor = "black";
+            ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+            
+            ctx.beginPath();
+            // Size changes with pulse (60 +/- 5)
+            ctx.arc(myX, myY, 60 + pulse, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 3. The Eyes (Glowing Red)
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "red";
+            ctx.fillStyle = "#ff0000";
+            
+            // Eyes move with the body
+            ctx.beginPath(); ctx.arc(myX + 20, myY - 15, 8, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(myX + 20, myY + 15, 8, 0, Math.PI*2); ctx.fill();
+
+            // 4. Reset Shadow
+            ctx.shadowBlur = 0;
+        }
+
+        function drawUI() {
+            // Stats Box
+            ctx.fillStyle = "#000"; ctx.fillRect(20, 20, 320, 90);
+            
+            ctx.fillStyle = liquidity > 30 ? "#4ade80" : "#ff4d4d"; 
+            ctx.font = "bold 24px Courier New";
+            ctx.fillText(`LIQUIDITY: £${liquidity.toFixed(2)}`, 30, 50);
+
+            ctx.fillStyle = "#fff"; 
+            ctx.font = "16px Courier New";
+            ctx.fillText(`SPEED: ${gameSpeed.toFixed(1)}`, 30, 80);
+
+            ctx.fillStyle = "#000"; ctx.fillRect(600, 20, 180, 60);
+            ctx.fillStyle = "#FFD700"; 
+            ctx.font = "bold 24px Courier New";
+            ctx.fillText(`SAVED: £${savings.toFixed(0)}`, 610, 55);
+
+        }
+
+        // 1. The Listener
+        window.addEventListener('keydown', e => {
+            if (!isPlaying) return;
+
+            let delay = 0;
+
+            // RIBA LAG LOGIC
+            // Only apply lag if we are in Riba Mode AND NOT protected by Kestrl
+            if (ribaMode && kestrlFrames <= 0) {
+                
+                // HARDER LAG:
+                // Round 1: Min 250ms (Heavy) -> Max 500ms
+                // Round 2: Min 350ms -> Max 700ms
+                
+                let minLag = 150 + (ribaRound * 50); 
+                let maxLag = 200 + (ribaRound * 100); 
+                
+                delay = Math.floor(Math.random() * (maxLag - minLag + 1)) + minLag;
+            }
+
+            // If Kestrl is active, delay stays 0 (Instant!)
+
+            // Push to Queue
+            inputQueue.push({
+                key: e.key,
+                executeTime: Date.now() + delay
+            });
+        });
+
+        // 2. The Processor (Executes them when time is up)
+        function processInputQueue() {
+            let now = Date.now();
+            for (let i = inputQueue.length - 1; i >= 0; i--) {
+                let input = inputQueue[i];
+                if (now >= input.executeTime) {
+                    
+                    // --- EXECUTE MOVEMENT ---
+                    let idx = LANES.indexOf(bird.targetY);
+                    if (input.key === 'ArrowUp' && idx > 0) bird.targetY = LANES[idx - 1];
+                    if (input.key === 'ArrowDown' && idx < 2) bird.targetY = LANES[idx + 1];
+                    if (input.key === 's' || input.key === 'S') {
+                        if (liquidity > 10) { 
+                            liquidity -= 10; 
+                            savings += 10; 
+                            
+                            // TRIGGER VISUAL: Launch a coin!
+                            flyingCoins.push(new TransferCoin());
+                        }
+                    }
+                    // ------------------------
+
+                    inputQueue.splice(i, 1); // Remove from queue
+                }
+            }
+        }
+
+        const startOverlay = document.getElementById('startOverlay');
+        const playBtn = document.getElementById('playButton');
+        const countDownEl = document.getElementById('countdown');
+        const gameOverOverlay = document.getElementById('gameOverOverlay');
+
+        playBtn.addEventListener('click', () => {
+            startOverlay.style.display = 'none';
+            let count = 3;
+            countDownEl.innerText = count;
+            let timer = setInterval(() => {
+                count--;
+                if(count > 0) { countDownEl.innerText = count; } 
+                else { clearInterval(timer); isPlaying = true; loop(); }
+            }, 500);
+        });
+
+        function triggerGameOver() {
+            isGameOver = true;
+            isPlaying = false;
+            liquidity = 0;
+            gameOverOverlay.style.display = 'flex';
+            document.getElementById('btnLoan').onclick = () => {
+                liquidity = 100;
+                burnRate += 2; 
+                // ACTIVATE RIBA MODE
+                ribaMode = true;
+                ribaRound++; // Increase difficulty level
+                resumeGame();
+            };
+            document.getElementById('btnSavings').disabled = (savings < 150);
+            document.getElementById('btnSavings').onclick = () => {
+                if(savings >= 150) { savings -= 150; liquidity = 100; resumeGame(); }
+            };
+            document.getElementById('btnGiveUp').onclick = () => { location.reload(); };
+        }
+
+        function resumeGame() {
+            gameOverOverlay.style.display = 'none';
+            isGameOver = false;
+            isPlaying = true;
+            loop();
+        }
+
+    </script>
+</body>
+</html>
