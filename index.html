@@ -49,8 +49,8 @@
 
     <div id="introOverlay">
         <div id="introWrapper">
-            <video id="introVideo" src="assets/intro/RibaRun 8.mp4" preload="auto"></video>
-            <button id="introPlayButton"></button>
+            <iframe id="introVideo" src="https://streamable.com/e/tmrbbx" frameborder="0" scrolling="no" allowfullscreen style="width:100%; height:100%; display:block;"></iframe>
+            <button id="introPlayButton" style="display:none;"></button>
             <button id="introProceedButton">PROCEED</button>
             <div id="introControls">
                 <button id="introSkip" class="introBtn">SKIP</button>
@@ -846,44 +846,46 @@
         });
 
         introPlayButton.addEventListener('click', () => {
-            introVideo.play();
-            introPlayButton.classList.add('hidden');
+            // Streamable iframe has built-in controls, so this is disabled
+            // introVideo.play();
+            // introPlayButton.classList.add('hidden');
         });
 
         introVideo.addEventListener('play', () => {
-            introPlayButton.classList.add('hidden');
+            // introPlayButton.classList.add('hidden');
         });
 
         introVideo.addEventListener('pause', () => {
-            if (introVideo.currentTime < introVideo.duration) {
-                introPlayButton.classList.remove('hidden');
-            }
+            // if (introVideo.currentTime < introVideo.duration) {
+            //     introPlayButton.classList.remove('hidden');
+            // }
         });
 
         introVolume.addEventListener('input', () => {
-            introVideo.volume = parseFloat(introVolume.value);
+            // Streamable iframe handles volume internally
+            // introVideo.volume = parseFloat(introVolume.value);
         });
 
         introSkip.addEventListener('click', () => {
-            introVideo.pause();
-            introVideo.currentTime = 0;
+            // introVideo.pause();
+            // introVideo.currentTime = 0;
             introPlayButton.classList.remove('hidden');
-            introProceedButton.style.display = 'none';
+            // introProceedButton.style.display = 'none';
             showMapScreen();
         });
 
         introReplay.addEventListener('click', () => {
-            introVideo.currentTime = 0;
-            introProceedButton.style.display = 'none';
-            introVideo.play();
+            // introVideo.currentTime = 0;
+            // introProceedButton.style.display = 'none';
+            // introVideo.play();
         });
 
         introVideo.addEventListener('ended', () => {
-            introPlayButton.classList.add('hidden');
+            // introPlayButton.classList.add('hidden');
             introProceedButton.style.display = 'block';
         });
 
-        introVideo.volume = 1;
+        // introVideo.volume = 1;
 
         playBtn.addEventListener('click', () => {
             startOverlay.style.display = 'none';
