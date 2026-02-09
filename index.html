@@ -23,9 +23,10 @@
         #mapWrapper { position: relative; width: 897px; height: 600px; background: #202020; border: 4px solid #4ade80; }
         #mapImage { width: 100%; height: 100%; object-fit: cover; }
         #mapStartButton { position: absolute; top: 15%; left: 8%; transform: translate(0, 0); background: transparent; border: none; cursor: pointer; width: 220px; height: 80px; background-image: url('assets/map/riba_run.png'); background-size: contain; background-repeat: no-repeat; background-position: center; color: transparent; font-size: 0; box-shadow: none; }
-        #introControls { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 10px; }
-        .introBtn { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 8px 14px; font-weight: bold; cursor: pointer; }
-        #introVolume { width: 160px; }
+        #introSkip { position: absolute; top: 20px; right: 20px; background: #4ade80; color: #012; border: none; font-weight: bold; padding: 12px 20px; font-size: 14px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.3s; z-index: 10; }
+        #introSkip:hover { background: #3bc46f; }
+        #introContinue { position: absolute; top: 75px; right: 20px; background: #4ade80; color: #012; border: none; font-weight: bold; padding: 12px 20px; font-size: 14px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: opacity 1s; opacity: 0; z-index: 10; }
+        #introContinue:hover { background: #3bc46f; }
         #gameOverWrapper { position: relative; max-width: 897px; width: 134.55%; }
         #gameOverImage { width: 100%; opacity: 0; transition: opacity 2s ease-in; margin-bottom: 20px; }
         #gameOverImage.fade-in { opacity: 1; }
@@ -52,12 +53,8 @@
             <iframe id="introVideo" src="https://streamable.com/e/tmrbbx" frameborder="0" scrolling="no" allowfullscreen style="width:100%; height:100%; display:block;"></iframe>
             <button id="introPlayButton" style="display:none;"></button>
             <button id="introProceedButton">PROCEED</button>
-            <div id="introControls">
-                <button id="introSkip" class="introBtn">SKIP</button>
-                <button id="introReplay" class="introBtn">REPLAY</button>
-                <label style="color:#fff; font-size:14px;">VOLUME</label>
-                <input id="introVolume" type="range" min="0" max="1" step="0.01" value="1" />
-            </div>
+            <button id="introSkip">SKIP</button>
+            <button id="introContinue">CONTINUE</button>
         </div>
     </div>
 
@@ -819,9 +816,13 @@
         const introPlayButton = document.getElementById('introPlayButton');
         const introProceedButton = document.getElementById('introProceedButton');
         const introSkip = document.getElementById('introSkip');
-        const introReplay = document.getElementById('introReplay');
-        const introVolume = document.getElementById('introVolume');
+        const introContinue = document.getElementById('introContinue');
         const mapOverlay = document.getElementById('mapOverlay');
+        
+        // Fade in continue button at 29 seconds
+        setTimeout(() => {
+            introContinue.style.opacity = '1';
+        }, 29000); // 29 seconds
         const mapStartButton = document.getElementById('mapStartButton');
         const playBtn = document.getElementById('playButton');
         const countDownEl = document.getElementById('countdown');
@@ -861,29 +862,20 @@
             // }
         });
 
-        introVolume.addEventListener('input', () => {
-            // Streamable iframe handles volume internally
-            // introVideo.volume = parseFloat(introVolume.value);
-        });
-
         introSkip.addEventListener('click', () => {
-            // introVideo.pause();
-            // introVideo.currentTime = 0;
-            introPlayButton.classList.remove('hidden');
-            // introProceedButton.style.display = 'none';
             showMapScreen();
         });
 
-        introReplay.addEventListener('click', () => {
-            // introVideo.currentTime = 0;
-            // introProceedButton.style.display = 'none';
-            // introVideo.play();
+        introContinue.addEventListener('click', () => {
+            showMapScreen();
         });
 
-        introVideo.addEventListener('ended', () => {
-            // introPlayButton.classList.add('hidden');
-            introProceedButton.style.display = 'block';
-        });
+        // Since Streamable iframes don't fire 'ended' events, we'll use a timeout
+        // Assuming the video is about 30-60 seconds, set timeout to pause after expected duration
+        setTimeout(() => {
+            introContinue.style.opacity = '1';
+            // Note: Cannot programmatically pause Streamable iframe
+        }, 35000); // 35 seconds to allow for full video + buffer
 
         // introVideo.volume = 1;
 
