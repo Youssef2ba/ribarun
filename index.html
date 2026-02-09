@@ -4,11 +4,35 @@
     <title>RibaRun - Industrial Chaos</title>
     <style>
         body { margin: 0; background-color: #202020; font-family: 'Courier New', Courier, monospace; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        canvas { border: 4px solid #4ade80; background: linear-gradient(to bottom, #87CEEB, #E0F6FF); box-shadow: 0 0 20px rgba(74, 222, 128, 0.2); }
+        canvas { border: 4px solid #4ade80; box-shadow: 0 0 20px rgba(74, 222, 128, 0.2); }
         
         /* UI OVERLAYS */
-        #startOverlay, #gameOverOverlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); z-index: 50; flex-direction: column; }
+        #startOverlay, #gameOverOverlay { position: absolute; inset: 0; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); z-index: 50; flex-direction: column; }
+        #startOverlay { display: none; }
         #gameOverOverlay { display: none; background: rgba(0,0,0,0.85); color: #fff; }
+        #introOverlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); z-index: 60; flex-direction: column; }
+        #introWrapper { position: relative; width: 897px; height: 600px; }
+        #introVideo { width: 100%; height: 100%; display: block; object-fit: cover; background: #000; }
+        #introPlayButton { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: rgba(74, 222, 128, 0.9); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); transition: all 0.3s; }
+        #introPlayButton:hover { background: rgba(74, 222, 128, 1); transform: translate(-50%, -50%) scale(1.1); }
+        #introPlayButton.hidden { display: none; }
+        #introPlayButton::after { content: ''; width: 0; height: 0; border-left: 25px solid #012; border-top: 15px solid transparent; border-bottom: 15px solid transparent; margin-left: 5px; }
+        #introProceedButton { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; background: #4ade80; border: none; color: #012; font-weight: bold; padding: 18px 32px; font-size: 28px; border-radius: 8px; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,0.3); }
+        #introProceedButton:hover { background: #3bc46f; }
+        #mapOverlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); z-index: 55; flex-direction: column; }
+        #mapWrapper { position: relative; width: 897px; height: 600px; background: #202020; border: 4px solid #4ade80; }
+        #mapImage { width: 100%; height: 100%; object-fit: cover; }
+        #mapStartButton { position: absolute; top: 15%; left: 8%; transform: translate(0, 0); background: transparent; border: none; cursor: pointer; width: 220px; height: 80px; background-image: url('assets/map/riba_run.png'); background-size: contain; background-repeat: no-repeat; background-position: center; color: transparent; font-size: 0; box-shadow: none; }
+        #introControls { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 10px; }
+        .introBtn { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 8px 14px; font-weight: bold; cursor: pointer; }
+        #introVolume { width: 160px; }
+        #gameOverWrapper { position: relative; max-width: 897px; width: 134.55%; }
+        #gameOverImage { width: 100%; opacity: 0; transition: opacity 2s ease-in; margin-bottom: 20px; }
+        #gameOverImage.fade-in { opacity: 1; }
+        .gameOverButton { position: absolute; background: transparent; border: none; cursor: pointer; padding: 0; }
+        #btnLoan { left: 20%; top: 45%; width: 15%; height: 10%; }
+        #btnSavings { right: 20%; top: 45%; width: 15%; height: 10%; }
+        #btnRestart { right: 18%; bottom: 10%; width: 15%; height: 10%; }
         #playButton { background: #4ade80; border: none; color: #012; font-weight: bold; padding: 18px 32px; font-size: 28px; border-radius: 8px; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,0.3); }
         #countdown { margin-top: 18px; font-size: 64px; color: #fff; font-weight: bold; text-shadow: 0 2px 6px rgba(0,0,0,0.6); }
         #gameOverCard { background: #111; padding: 28px; border-radius: 12px; text-align: center; min-width: 320px; border: 1px solid #333; }
@@ -21,7 +45,28 @@
 </head>
 <body>
 
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <canvas id="gameCanvas" width="897" height="600"></canvas>
+
+    <div id="introOverlay">
+        <div id="introWrapper">
+            <video id="introVideo" src="assets/intro/RibaRun 8.mp4" preload="auto"></video>
+            <button id="introPlayButton"></button>
+            <button id="introProceedButton">PROCEED</button>
+            <div id="introControls">
+                <button id="introSkip" class="introBtn">SKIP</button>
+                <button id="introReplay" class="introBtn">REPLAY</button>
+                <label style="color:#fff; font-size:14px;">VOLUME</label>
+                <input id="introVolume" type="range" min="0" max="1" step="0.01" value="1" />
+            </div>
+        </div>
+    </div>
+
+    <div id="mapOverlay">
+        <div id="mapWrapper">
+            <img id="mapImage" src="assets/map/main_map.png" alt="Game Map">
+            <button id="mapStartButton">START RUN</button>
+        </div>
+    </div>
 
     <div id="startOverlay">
         <button id="playButton">START RUN</button>
@@ -29,22 +74,25 @@
     </div>
 
     <div id="gameOverOverlay">
-        <div id="gameOverCard">
-            <h2 style="color: #ff4d4d; font-size: 32px; margin-top:0;">LIQUIDITY CRISIS</h2>
-            <p id="gameOverText">You ran out of money.</p>
-            <div style="margin-top:20px">
-                <button id="btnLoan" class="gameOverBtn primary">TAKE LOAN (+£100)</button><br>
-                <small style="color:#aaa;">(Warning: Increases Burn Rate)</small><br><br>
-                <button id="btnSavings" class="gameOverBtn secondary">USE SAVINGS (-£150)</button><br>
-                <button id="btnGiveUp" class="gameOverBtn ghost">DECLARE BANKRUPTCY</button>
-            </div>
+        <div id="gameOverWrapper">
+            <img id="gameOverImage" src="assets/game over image.jpeg" alt="Game Over">
+            <button id="btnLoan" class="gameOverButton"></button>
+            <button id="btnSavings" class="gameOverButton"></button>
+            <button id="btnRestart" class="gameOverButton"></button>
         </div>
     </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const birdImage = new Image(); birdImage.src = 'https://gcdnb.pbrd.co/images/WoqvA047BYC9.png?o=1';
+        const birdImage = new Image(); birdImage.src = 'assets/bird-sprite.png';
+        const bgImage = new Image(); bgImage.src = 'assets/bg/all_backgrounds.jpg';
+        
+        // Bird animation variables
+        let birdFrameIndex = 0;
+        const BIRD_FRAME_WIDTH = 200;
+        const BIRD_TOTAL_FRAMES = 10;
+        const BIRD_ANIMATION_SPEED = 0.15; // Frames per game loop iteration
 
         // ==========================================
         //        THE GOD PANEL
@@ -53,6 +101,7 @@
         let gameSpeed = 7;           
         const MAX_SPEED = 19;        
         const ACCELERATION = 0.005;  
+        const BG_SCROLL_SPEED = 0.05; // Background scrolls at 5% of game speed (adjust this: higher = faster)
         
         let verticalSpeed = 0.25;   
         
@@ -125,7 +174,7 @@
         const MONSTER_X = 50;           // Monster stays on left
 
         const bird = {
-            x: 75, y: LANES[1], targetY: LANES[1], size: 80, neutralX: 100,
+            x: 75, y: LANES[1], targetY: LANES[1], size: 200, neutralX: 100,
             
             update: function() {
                 this.y += (this.targetY - this.y) * verticalSpeed;
@@ -136,6 +185,14 @@
             },
 
             draw: function() {
+                // --- BIRD ANIMATION (Sprite Sheet) ---
+                birdFrameIndex += BIRD_ANIMATION_SPEED;
+                if (birdFrameIndex >= BIRD_TOTAL_FRAMES) {
+                    birdFrameIndex = 0; // Loop animation
+                }
+                const currentFrame = Math.floor(birdFrameIndex);
+                const spriteX = currentFrame * BIRD_FRAME_WIDTH;
+                
                 // --- KESTRL GOLD GLOW ---
                 if (kestrlFrames > 0) {
                     ctx.shadowBlur = 20;
@@ -177,7 +234,7 @@
                     ctx.fillRect(this.x - 29, this.y + 61, 58 * pct, 6);
                 }
 
-                ctx.drawImage(birdImage, this.x, this.y - this.size/2, this.size, this.size);
+                ctx.drawImage(birdImage, spriteX, 0, BIRD_FRAME_WIDTH, BIRD_FRAME_WIDTH, this.x, this.y - this.size/2, this.size, this.size);
             }
         };
 
@@ -616,13 +673,31 @@
         }
 
         function drawBackground() {
-            bgOffset -= gameSpeed;
-            if (bgOffset <= -800) bgOffset = 0;
+            bgOffset -= gameSpeed * BG_SCROLL_SPEED;
+            
+            // Draw scrolling background image
+            if (bgImage.complete && bgImage.naturalWidth > 0) {
+                const bgWidth = bgImage.width;
+                const bgHeight = bgImage.height;
+                
+                // Scale background to canvas height
+                const scale = canvas.height / bgHeight;
+                const scaledWidth = bgWidth * scale;
+                
+                // Calculate position for seamless scrolling
+                const xPos = bgOffset % scaledWidth;
+                
+                // Draw two copies for seamless loop
+                ctx.drawImage(bgImage, xPos, 0, scaledWidth, canvas.height);
+                ctx.drawImage(bgImage, xPos + scaledWidth, 0, scaledWidth, canvas.height);
+            }
+            
+            // Draw lane lines
             ctx.strokeStyle = "rgba(255,255,255,0.6)";
             ctx.lineWidth = 2; ctx.setLineDash([20, 20]);
             LANES.forEach(y => {
                 ctx.lineDashOffset = -bgOffset; 
-                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(800, y); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
             });
         }
         function drawRibaMonster() {
@@ -675,10 +750,10 @@
             ctx.font = "16px Courier New";
             ctx.fillText(`SPEED: ${gameSpeed.toFixed(1)}`, 30, 80);
 
-            ctx.fillStyle = "#000"; ctx.fillRect(600, 20, 180, 60);
+            ctx.fillStyle = "#000"; ctx.fillRect(640, 20, 180, 60);
             ctx.fillStyle = "#FFD700"; 
             ctx.font = "bold 24px Courier New";
-            ctx.fillText(`SAVED: £${savings.toFixed(0)}`, 610, 55);
+            ctx.fillText(`SAVED: £${savings.toFixed(0)}`, 650, 55);
 
         }
 
@@ -739,9 +814,76 @@
         }
 
         const startOverlay = document.getElementById('startOverlay');
+        const introOverlay = document.getElementById('introOverlay');
+        const introVideo = document.getElementById('introVideo');
+        const introPlayButton = document.getElementById('introPlayButton');
+        const introProceedButton = document.getElementById('introProceedButton');
+        const introSkip = document.getElementById('introSkip');
+        const introReplay = document.getElementById('introReplay');
+        const introVolume = document.getElementById('introVolume');
+        const mapOverlay = document.getElementById('mapOverlay');
+        const mapStartButton = document.getElementById('mapStartButton');
         const playBtn = document.getElementById('playButton');
         const countDownEl = document.getElementById('countdown');
         const gameOverOverlay = document.getElementById('gameOverOverlay');
+
+        function showMapScreen() {
+            introOverlay.style.display = 'none';
+            mapOverlay.style.display = 'flex';
+        }
+
+        function showStartOverlay() {
+            mapOverlay.style.display = 'none';
+            startOverlay.style.display = 'flex';
+        }
+
+        introProceedButton.addEventListener('click', () => {
+            showMapScreen();
+        });
+
+        mapStartButton.addEventListener('click', () => {
+            showStartOverlay();
+        });
+
+        introPlayButton.addEventListener('click', () => {
+            introVideo.play();
+            introPlayButton.classList.add('hidden');
+        });
+
+        introVideo.addEventListener('play', () => {
+            introPlayButton.classList.add('hidden');
+        });
+
+        introVideo.addEventListener('pause', () => {
+            if (introVideo.currentTime < introVideo.duration) {
+                introPlayButton.classList.remove('hidden');
+            }
+        });
+
+        introVolume.addEventListener('input', () => {
+            introVideo.volume = parseFloat(introVolume.value);
+        });
+
+        introSkip.addEventListener('click', () => {
+            introVideo.pause();
+            introVideo.currentTime = 0;
+            introPlayButton.classList.remove('hidden');
+            introProceedButton.style.display = 'none';
+            showMapScreen();
+        });
+
+        introReplay.addEventListener('click', () => {
+            introVideo.currentTime = 0;
+            introProceedButton.style.display = 'none';
+            introVideo.play();
+        });
+
+        introVideo.addEventListener('ended', () => {
+            introPlayButton.classList.add('hidden');
+            introProceedButton.style.display = 'block';
+        });
+
+        introVideo.volume = 1;
 
         playBtn.addEventListener('click', () => {
             startOverlay.style.display = 'none';
@@ -759,6 +901,9 @@
             isPlaying = false;
             liquidity = 0;
             gameOverOverlay.style.display = 'flex';
+            const gameOverImage = document.getElementById('gameOverImage');
+            gameOverImage.classList.remove('fade-in');
+            setTimeout(() => gameOverImage.classList.add('fade-in'), 10);
             document.getElementById('btnLoan').onclick = () => {
                 liquidity = 100;
                 burnRate += 2; 
@@ -771,11 +916,13 @@
             document.getElementById('btnSavings').onclick = () => {
                 if(savings >= 150) { savings -= 150; liquidity = 100; resumeGame(); }
             };
-            document.getElementById('btnGiveUp').onclick = () => { location.reload(); };
+            document.getElementById('btnRestart').onclick = () => { location.reload(); };
         }
 
         function resumeGame() {
             gameOverOverlay.style.display = 'none';
+            const gameOverImage = document.getElementById('gameOverImage');
+            gameOverImage.classList.remove('fade-in');
             isGameOver = false;
             isPlaying = true;
             loop();
