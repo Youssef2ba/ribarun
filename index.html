@@ -53,6 +53,23 @@
         .secondary { background: #e2e8f0; color: #022; } 
         .ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); } 
         .gameOverBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+        /* --- DEBT MODE VIGNETTE --- */
+        #debtVignette {
+            position: absolute; inset: 0; pointer-events: none; z-index: 80;
+            /* The Tunnel Vision: Clear in middle, Dark Red/Black on edges */
+            background: radial-gradient(circle, transparent 30%, rgba(80, 0, 0, 0.95) 100%);
+            opacity: 0; transition: opacity 0.5s ease;
+        }
+        /* The Breathing Effect */
+        #debtVignette.active {
+            opacity: 1;
+            animation: breathe 1s infinite ease-in-out;
+        }
+        @keyframes breathe {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.02); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
     </style>
 </head>
 <body>
@@ -93,9 +110,11 @@
     <div id="survivalOverlay">
         <div id="survivalTime">SURVIVED 00:00</div>
     </div>
+    <div id="debtVignette"></div>
     <div id="runTimer" class="hidden">00:00</div>
 
     <script>
+        const debtVignette = document.getElementById('debtVignette');
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const birdImage = new Image(); birdImage.src = 'assets/bird-sprite.png';
@@ -106,7 +125,8 @@
         const toxicIcon = new Image(); toxicIcon.src = 'assets/icons/hdbarrel.png';
         const militaryIcon = new Image(); militaryIcon.src = 'assets/icons/rocketlauncher.png';
         const kestrlIcon = new Image(); kestrlIcon.src = 'assets/icons/kestrl_card.png';
-        const iconImages = [coinIcon, alcoholIcon, gamblingIcon, toxicIcon, militaryIcon, kestrlIcon];
+        const sadaqahIcon = new Image(); sadaqahIcon.src = 'assets/icons/Sadaqah.png';
+        const iconImages = [coinIcon, alcoholIcon, gamblingIcon, toxicIcon, militaryIcon, kestrlIcon, sadaqahIcon];
         let iconsReady = false;
         Promise.all(iconImages.map(img => {
             if (img.decode) return img.decode().catch(() => {});
@@ -121,6 +141,7 @@
         
         // Bird animation variables
         let birdFrameIndex = 0;
+        let monsterY = 300; // Starts in the middle lane
         const BIRD_FRAME_WIDTH = 200;
         const BIRD_TOTAL_FRAMES = 10;
         const BIRD_ANIMATION_SPEED = 0.15; // Frames per game loop iteration
@@ -316,25 +337,61 @@
                     }
                     drawIcon(coinIcon, this.x, this.y, COIN_ICON_SIZE * 1.2, COIN_ICON_SIZE);
                 } 
-                else if (this.type === 2) { // ALCOHOL
-                    drawIcon(alcoholIcon, this.x, this.y, COIN_ICON_SIZE, COIN_ICON_SIZE);
+                
+                // --- HAZARD ANIMATIONS (No Glow, Just Movement) ---
+                else if (this.type >= 2 && this.type <= 5) {
+                    ctx.save();
+                    
+                    // 1. Move Context to the Object's Center (Crucial for rotation/scaling)
+                    ctx.translate(this.x, this.y);
+
+                    // --- TYPE 2: ALCOHOL (Slow Breathing Pulse) ---
+                    if (this.type === 2) {
+                        let scale = 1 + Math.sin(Date.now() / 400) * 0.1; // Slow breath
+                        ctx.scale(scale, scale);
+                        drawIcon(alcoholIcon, 0, 0, COIN_ICON_SIZE, COIN_ICON_SIZE);
+                    }
+                    
+                    // --- TYPE 3: GAMBLING (Spinning/Wobble) ---
+                    else if (this.type === 3) {
+                        let angle = Math.sin(Date.now() / 150) * 0.3; // Fast back-and-forth tilt
+                        ctx.rotate(angle);
+                        drawIcon(gamblingIcon, 0, 0, COIN_ICON_SIZE, COIN_ICON_SIZE);
+                    }
+
+                    // --- TYPE 4: TOXIC (Floating Up/Down) ---
+                    else if (this.type === 4) {
+                        let floatY = Math.sin(Date.now() / 300) * 5; // Bobbing
+                        drawIcon(toxicIcon, 0, floatY, COIN_ICON_SIZE, COIN_ICON_SIZE);
+                    }
+
+                    // --- TYPE 5: BOMB (Violent Shaking) ---
+                    else if (this.type === 5) {
+                        let shakeX = (Math.random() - 0.5) * 6; // Jitter X
+                        let shakeY = (Math.random() - 0.5) * 6; // Jitter Y
+                        drawIcon(militaryIcon, shakeX, shakeY, COIN_ICON_SIZE, COIN_ICON_SIZE * 1.5);
+                    }
+
+                    ctx.restore();
                 }
-                else if (this.type === 3) { // GAMBLING
-                    drawIcon(gamblingIcon, this.x, this.y, COIN_ICON_SIZE, COIN_ICON_SIZE);
-                }
-                else if (this.type === 4) { // TOXIC
-                    drawIcon(toxicIcon, this.x, this.y, COIN_ICON_SIZE, COIN_ICON_SIZE);
-                }
-                else if (this.type === 5) { // MILITARY
-                    drawIcon(militaryIcon, this.x, this.y, COIN_ICON_SIZE, COIN_ICON_SIZE * 1.5);
-                }
+                
                 else if (this.type === 6) { // KESTRL CARD
+                    ctx.save(); // 1. Isolate the effect so it doesn't blur everything else
+                    ctx.shadowBlur = 30; // 2. How big is the glow? (Higher = bigger)
+                    ctx.shadowColor = "#4ade80"; // 3. Neon Green (Kestrl Brand)
+
                     drawIcon(kestrlIcon, this.x, this.y, COIN_ICON_SIZE * 2, COIN_ICON_SIZE*1.5);
+
+                    ctx.restore();
                 }
                 else if (this.type === 7) { // SADAQAH BOX
-                    ctx.fillStyle = "#3b82f6"; // Blue
-                    ctx.fillRect(this.x - 20, this.y - 15, 40, 30);
-                    ctx.fillStyle = "#fff"; ctx.font = "bold 16px Arial"; ctx.fillText("BOX", this.x - 15, this.y + 5);
+                    ctx.save();
+                    ctx.shadowBlur = 25; 
+                    ctx.shadowColor = "#FFD700"; // Gold/White (Makes it pop against dark bg)
+
+                    drawIcon(sadaqahIcon, this.x, this.y, COIN_ICON_SIZE * 1.5, COIN_ICON_SIZE * 1.2);
+
+                    ctx.restore();
                 }
                 if (isGhost) {
                     ctx.restore(); // Unfreeze settings (Opacity goes back to 1.0)
@@ -597,22 +654,42 @@
                 c.draw();
                 if (c.x < -50) { coins.splice(i, 1); continue; }
                 let hitRange = (kestrlFrames > 0) ? 90 : 50;
-                if (!c.collected && Math.abs(bird.x - c.x) < hitRange && Math.abs(bird.y - c.y) < hitRange) {
-                    // --- NEW GHOST LOGIC STARTS HERE ---
-                    // If Shield is ON (Frames > 0) AND it is an Obstacle (Type 2-5)
-                    // Then STOP. Do not collect. Do not remove. Just ignore.
-                    if (kestrlFrames > 0 && c.type >= 2 && c.type <= 5) {
-                        continue; 
-                    }
-                    // --- NEW GHOST LOGIC ENDS HERE ---
-                    c.collected = true;
-                    applyCoinEffect(c); // <--- This triggers the shakeFrames variable
-                    // NEW: If Magnet is ON, subtract this coin from the Cap
-                    if (magnetActive && c.type === 1) {
-                        magnetCap -= COIN_VALUE; 
-                    }
-                    coins.splice(i, 1);
+                // --- 1. THE VACUUM (Mini-Magnet) ---
+            // Sucks in Gold/Kestrl if within 150px
+            if (!c.collected && (c.type === 1 || c.type === 6)) {
+                let dist = Math.hypot(bird.x - c.x, bird.y - c.y);
+                if (dist < 90) {
+                    c.x += (bird.x - c.x) * 0.10; 
+                    c.y += (bird.y - c.y) * 0.10;
                 }
+            }
+
+            // --- 2. HITBOX BIASING ---
+            // Re-calculate hitRange for this specific frame
+            // Good things = 80px, Bad things = 35px
+            hitRange = (c.type === 1 || c.type === 6 || c.type === 7) ? 55 : 30;
+            
+            // Shield Bonus: Everything is huge (90px)
+            if (kestrlFrames > 0) hitRange = 60;
+
+            // --- 3. COLLISION CHECK ---
+            if (!c.collected && Math.abs(bird.x - c.x) < hitRange && Math.abs(bird.y - c.y) < hitRange) {
+                
+                // GHOST LOGIC: Ignore traps if Shield is ON
+                if (kestrlFrames > 0 && c.type >= 2 && c.type <= 5) {
+                    continue; 
+                }
+
+                c.collected = true;
+                applyCoinEffect(c); 
+
+                // MAGNET LOGIC: Subtract from Cap
+                if (magnetActive && c.type === 1) {
+                    magnetCap -= COIN_VALUE; 
+                }
+                
+                coins.splice(i, 1);
+            }
             }
 
             bird.draw();
@@ -642,6 +719,13 @@
                 runElapsedMs += (now - runTimerLastMs);
                 runTimerLastMs = now;
                 runTimerEl.textContent = formatRunTime(runElapsedMs);
+            }
+            // --- DEBT VISUALS ---
+            // If we are in Riba Mode OR Liquidity is critical (< 0)
+            if (ribaMode || liquidity < 0) {
+                debtVignette.classList.add('active');
+            } else {
+                debtVignette.classList.remove('active');
             }
             drawUI();
             
@@ -733,39 +817,48 @@
         function drawRibaMonster() {
             if (!ribaMode) return;
 
-            // 1. MOVEMENT MATH
-            // Hover: Up and down slowly
-            let hover = Math.sin(frameCount * 0.05) * 10;
-            let myY = bird.y + hover; 
+            // 1. LAZY TRACKING (The Lag)
+            // Move 5% of the distance to the bird per frame (Very heavy, floaty feel)
+            monsterY += (bird.y - monsterY) * 0.04;
 
-            // Pulse: Grow and shrink (Heartbeat effect)
-            let pulse = Math.sin(frameCount * 0.1) * 5;
+            // 2. THE EBB AND FLOW (Surging forward/back)
+            // It moves between X=20 and X=60 over 2 seconds
+            let surge = Math.sin(frameCount * 0.05) * 20; 
+            let baseCreep = Math.min(ribaRound * 5, 40); // Gets closer every round
+            let myX = 40 + baseCreep + surge;
 
-            // Creep: Starts back (-30), gets 15px closer per Round, maxes out at 50px
-            let creep = Math.min(ribaRound * 15, 80); 
-            let myX = -30 + creep;
-
-            // 2. The Shadow Body (Pulsing Size)
-            ctx.shadowBlur = 40 + pulse; // Blur pulses too
-            ctx.shadowColor = "black";
-            ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+            ctx.save();
             
+            // 3. THE EVENT HORIZON (Pulsing Glow)
+            // Glow expands/contracts with the surge
+            let pulseSize = 30 + Math.sin(frameCount * 0.05) * 10;
+            ctx.shadowBlur = pulseSize;
+            ctx.shadowColor = "rgba(128, 0, 128, 0.8)"; 
+            
+            // 4. THE VOID
+            ctx.fillStyle = "black";
             ctx.beginPath();
-            // Size changes with pulse (60 +/- 5)
-            ctx.arc(myX, myY, 60 + pulse, 0, Math.PI * 2);
+            ctx.arc(myX, monsterY, 55, 0, Math.PI * 2); // Use monsterY, NOT bird.y
             ctx.fill();
 
-            // 3. The Eyes (Glowing Red)
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = "red";
-            ctx.fillStyle = "#ff0000";
-            
-            // Eyes move with the body
-            ctx.beginPath(); ctx.arc(myX + 20, myY - 15, 8, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(myX + 20, myY + 15, 8, 0, Math.PI*2); ctx.fill();
+            // 5. THE ACCRETION DISK (Ring)
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(myX, monsterY, 55, 0, Math.PI * 2);
+            ctx.stroke();
 
-            // 4. Reset Shadow
-            ctx.shadowBlur = 0;
+            // 6. THE LABEL ("RIBA") - STABLE
+            // No jitter. Just solid, ominous text.
+            ctx.shadowBlur = 0; 
+            ctx.fillStyle = "white";
+            ctx.font = "bold 24px Courier New";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            
+            ctx.fillText("RIBA", myX, monsterY);
+
+            ctx.restore();
         }
 
         function drawUI() {
@@ -1084,3 +1177,6 @@
     </script>
 </body>
 </html>
+
+
+
