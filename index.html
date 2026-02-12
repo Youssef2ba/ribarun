@@ -22,18 +22,29 @@
         #mapOverlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); z-index: 55; flex-direction: column; }
         #mapWrapper { position: relative; width: 897px; height: 600px; background: #202020; border: 4px solid #4ade80; }
         #mapImage { width: 100%; height: 100%; object-fit: cover; }
-        #mapStartButton { position: absolute; top: 15%; left: 8%; transform: translate(0, 0); background: transparent; border: none; cursor: pointer; width: 220px; height: 80px; background-image: url('assets/map/riba_run.png'); background-size: contain; background-repeat: no-repeat; background-position: center; color: transparent; font-size: 0; box-shadow: none; }
+        #mapStartButton { position: absolute; bottom: 27%; left: 1%; transform: translate(0, 0); background: transparent; border: none; cursor: pointer; width: 220px; height: 80px; background-image: url('assets/map/riba_run.png'); background-size: contain; background-repeat: no-repeat; background-position: center; color: transparent; font-size: 0; box-shadow: none; }
         #introSkip { position: absolute; top: 20px; right: 20px; background: #4ade80; color: #012; border: none; font-weight: bold; padding: 12px 20px; font-size: 14px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.3s; z-index: 10; }
         #introSkip:hover { background: #3bc46f; }
-        #introContinue { position: absolute; top: 75px; right: 20px; background: #4ade80; color: #012; border: none; font-weight: bold; padding: 12px 20px; font-size: 14px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: opacity 1s; opacity: 0; z-index: 10; }
+        #introContinue { position: absolute; top: 75px; right: 20px; background: #4ade80; color: #012; border: none; font-weight: bold; padding: 12px 20px; font-size: 14px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: opacity 0.3s; opacity: 0; z-index: 10; }
         #introContinue:hover { background: #3bc46f; }
         #gameOverWrapper { position: relative; max-width: 897px; width: 134.55%; }
-        #gameOverImage { width: 100%; opacity: 0; transition: opacity 2s ease-in; margin-bottom: 20px; }
+        #gameOverImage { width: 100%; opacity: 0; transition: opacity 2s ease-in; margin-bottom: 20px; animation: hoverFloat 3.6s ease-in-out infinite; }
         #gameOverImage.fade-in { opacity: 1; }
-        .gameOverButton { position: absolute; background: transparent; border: none; cursor: pointer; padding: 0; }
-        #btnLoan { left: 20%; top: 45%; width: 15%; height: 10%; }
-        #btnSavings { right: 20%; top: 45%; width: 15%; height: 10%; }
+        .gameOverButton { position: absolute; background: transparent; border: none; cursor: pointer; padding: 0; opacity: 0; transition: opacity 2s ease-in; animation: hoverFloat 3.2s ease-in-out infinite; }
+        .gameOverButton.fade-in { opacity: 1; }
+        #btnLoan { left: 20%; top: calc(45% - 70px); width: calc(10% + 20px); height: calc(15% + 150px); background-image: url('assets/game-end/takeloan.png'); background-size: 300% auto; background-repeat: no-repeat; background-position: center; }
+        #btnSavings { right: 20%; top: calc(45% - 70px); width: calc(10% + 20px); height: calc(15% + 150px); background-image: url('assets/game-end/usesavings.png'); background-size: 300% auto; background-repeat: no-repeat; background-position: center; }
         #btnRestart { right: 18%; bottom: 10%; width: 15%; height: 10%; }
+        #bankruptcyBadge { position: absolute; right: -4%; bottom: -2%; width: 21.6%; height: auto; opacity: 0; transition: opacity 2s ease-in; animation: hoverFloat 3.8s ease-in-out infinite; }
+        #bankruptcyBadge.fade-in { opacity: 1; }
+        #runTimer { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 28px; font-weight: bold; text-shadow: 0 2px 8px rgba(0,0,0,0.7); z-index: 70; pointer-events: none; }
+        #runTimer.hidden { display: none; }
+        #survivalOverlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: #000; z-index: 80; }
+        #survivalTime { color: #fff; font-size: 40px; font-weight: bold; text-shadow: 0 2px 8px rgba(0,0,0,0.7); }
+        @keyframes hoverFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
         #playButton { background: #4ade80; border: none; color: #012; font-weight: bold; padding: 18px 32px; font-size: 28px; border-radius: 8px; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,0.3); }
         #countdown { margin-top: 18px; font-size: 64px; color: #fff; font-weight: bold; text-shadow: 0 2px 6px rgba(0,0,0,0.6); }
         #gameOverCard { background: #111; padding: 28px; border-radius: 12px; text-align: center; min-width: 320px; border: 1px solid #333; }
@@ -60,7 +71,7 @@
 
     <div id="mapOverlay">
         <div id="mapWrapper">
-            <img id="mapImage" src="assets/map/main_map.png" alt="Game Map">
+            <img id="mapImage" src="assets/map/main_map.PNG" alt="Game Map">
             <button id="mapStartButton">START RUN</button>
         </div>
     </div>
@@ -72,18 +83,41 @@
 
     <div id="gameOverOverlay">
         <div id="gameOverWrapper">
-            <img id="gameOverImage" src="assets/game over image.jpeg" alt="Game Over">
+            <img id="gameOverImage" src="assets/game-end/background_frame_1.PNG" alt="Game Over">
             <button id="btnLoan" class="gameOverButton"></button>
             <button id="btnSavings" class="gameOverButton"></button>
             <button id="btnRestart" class="gameOverButton"></button>
+            <img id="bankruptcyBadge" src="assets/game-end/bankruptcy.png" alt="Bankruptcy">
         </div>
     </div>
+    <div id="survivalOverlay">
+        <div id="survivalTime">SURVIVED 00:00</div>
+    </div>
+    <div id="runTimer" class="hidden">00:00</div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const birdImage = new Image(); birdImage.src = 'assets/bird-sprite.png';
         const bgImage = new Image(); bgImage.src = 'assets/bg/all_backgrounds.jpg';
+        const coinIcon = new Image(); coinIcon.src = 'assets/icons/hdcoin.png';
+        const alcoholIcon = new Image(); alcoholIcon.src = 'assets/icons/hdbeer.png';
+        const gamblingIcon = new Image(); gamblingIcon.src = 'assets/icons/hdpoker.png';
+        const toxicIcon = new Image(); toxicIcon.src = 'assets/icons/hdbarrel.png';
+        const militaryIcon = new Image(); militaryIcon.src = 'assets/icons/rocketlauncher.png';
+        const kestrlIcon = new Image(); kestrlIcon.src = 'assets/icons/kestrl_card.png';
+        const iconImages = [coinIcon, alcoholIcon, gamblingIcon, toxicIcon, militaryIcon, kestrlIcon];
+        let iconsReady = false;
+        Promise.all(iconImages.map(img => {
+            if (img.decode) return img.decode().catch(() => {});
+            return new Promise(resolve => {
+                if (img.complete) return resolve();
+                img.onload = () => resolve();
+                img.onerror = () => resolve();
+            });
+        })).then(() => {
+            iconsReady = true;
+        });
         
         // Bird animation variables
         let birdFrameIndex = 0;
@@ -196,7 +230,7 @@
                     ctx.shadowColor = "#FFD700"; // Gold Glow
                     ctx.fillStyle = "rgba(255, 215, 0, 0.3)"; // Semi-transparent gold circle
                     ctx.beginPath();
-                    ctx.arc(this.x + 30, this.y, this.size/1.5, 0, Math.PI*2);
+                    ctx.arc(this.x + 100, this.y, this.size/1.5, 0, Math.PI*2);
                     ctx.fill();
                     ctx.shadowBlur = 0; // Reset so other things don't glow
                 }
@@ -235,6 +269,17 @@
             }
         };
 
+        const COIN_ICON_SIZE = 60;
+
+        function drawIcon(img, x, y, width, height) {
+            if (!iconsReady || !img.complete || img.naturalWidth === 0) {
+                ctx.fillStyle = "#4b5563";
+                ctx.fillRect(x - width / 2, y - height / 2, width, height);
+                return;
+            }
+            ctx.drawImage(img, x - width / 2, y - height / 2, width, height);
+        }
+
         class Coin {
             constructor(row, type) {
                 this.y = LANES[row];
@@ -265,44 +310,26 @@
                 }
 
                 if (this.type === 1) { // GOLD
-                    // Double Coin Visual if Shield Active
+                    // Double coin visual if shield active
                     if (kestrlFrames > 0) {
-                        ctx.fillStyle = "#FFD700";
-                        // Changed -5 to -35 to separate them
-                        ctx.beginPath(); ctx.arc(this.x - 35, this.y, 20, 0, Math.PI * 2); ctx.fill(); 
+                        drawIcon(coinIcon, this.x - 30, this.y, COIN_ICON_SIZE * 1.2, COIN_ICON_SIZE);
                     }
-                    // Normal Coin
-                    ctx.fillStyle = "#FFD700";
-                    ctx.beginPath(); ctx.arc(this.x, this.y, 20, 0, Math.PI * 2); ctx.fill();
-                    ctx.fillStyle = "#DAA520"; ctx.font = "bold 20px Arial"; ctx.fillText("£", this.x - 6, this.y + 7);
+                    drawIcon(coinIcon, this.x, this.y, COIN_ICON_SIZE * 1.2, COIN_ICON_SIZE);
                 } 
                 else if (this.type === 2) { // ALCOHOL
-                    ctx.fillStyle = "#22c55e"; 
-                    ctx.fillRect(this.x - 15, this.y - 25, 30, 50);
-                    ctx.fillStyle = "#fff"; ctx.font = "bold 14px Arial"; ctx.fillText("HRM", this.x-15, this.y+5);
+                    drawIcon(alcoholIcon, this.x, this.y, COIN_ICON_SIZE, COIN_ICON_SIZE);
                 }
                 else if (this.type === 3) { // GAMBLING
-                    ctx.fillStyle = "#ef4444"; 
-                    ctx.fillRect(this.x - 20, this.y - 20, 40, 40);
-                    ctx.fillStyle = "#fff"; ctx.font = "bold 24px Arial"; ctx.fillText("?", this.x - 8, this.y + 8);
+                    drawIcon(gamblingIcon, this.x, this.y, COIN_ICON_SIZE, COIN_ICON_SIZE);
                 }
                 else if (this.type === 4) { // TOXIC
-                    ctx.fillStyle = "#800080"; 
-                    ctx.fillRect(this.x - 20, this.y - 15, 40, 30);
-                    ctx.fillStyle = "#7cfc00"; ctx.font = "bold 12px Arial"; ctx.fillText("TOX", this.x - 12, this.y + 5);
+                    drawIcon(toxicIcon, this.x, this.y, COIN_ICON_SIZE, COIN_ICON_SIZE);
                 }
                 else if (this.type === 5) { // MILITARY
-                    ctx.fillStyle = "#2F4F4F"; 
-                    ctx.beginPath(); ctx.arc(this.x, this.y, 22, 0, Math.PI * 2); ctx.fill();
-                    ctx.fillStyle = "#FF0000"; ctx.font = "bold 18px Arial"; ctx.fillText("💣", this.x - 10, this.y + 6);
+                    drawIcon(militaryIcon, this.x, this.y, COIN_ICON_SIZE, COIN_ICON_SIZE * 1.5);
                 }
                 else if (this.type === 6) { // KESTRL CARD
-                    // Black Card with Green Border
-                    ctx.fillStyle = "#000"; 
-                    ctx.fillRect(this.x - 25, this.y - 18, 50, 36);
-                    ctx.strokeStyle = "#4ade80"; ctx.lineWidth = 3;
-                    ctx.strokeRect(this.x - 25, this.y - 18, 50, 36);
-                    ctx.fillStyle = "#4ade80"; ctx.font = "bold 24px Arial"; ctx.fillText("K", this.x - 8, this.y + 8);
+                    drawIcon(kestrlIcon, this.x, this.y, COIN_ICON_SIZE * 2, COIN_ICON_SIZE*1.5);
                 }
                 else if (this.type === 7) { // SADAQAH BOX
                     ctx.fillStyle = "#3b82f6"; // Blue
@@ -598,7 +625,7 @@
             // Effect: TOXIC GREEN OVERLAY
             if (toxicFrames > 0) {
                 toxicFrames--;
-                ctx.fillStyle = "rgba(0, 255, 0, 0.3)"; // Sick Green
+                ctx.fillStyle = "rgba(0, 255, 0, 0.7)"; // Sick Green
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
             // --- DRAW FLYING COINS (Transfer Effect) ---
@@ -609,6 +636,12 @@
                 if (fc.finished) {
                     flyingCoins.splice(i, 1); // Remove when it lands
                 }
+            }
+            if (runTimerRunning) {
+                const now = performance.now();
+                runElapsedMs += (now - runTimerLastMs);
+                runTimerLastMs = now;
+                runTimerEl.textContent = formatRunTime(runElapsedMs);
             }
             drawUI();
             
@@ -819,14 +852,91 @@
         const introContinue = document.getElementById('introContinue');
         const mapOverlay = document.getElementById('mapOverlay');
         
-        // Fade in continue button at 29 seconds
-        setTimeout(() => {
-            introContinue.style.opacity = '1';
-        }, 29000); // 29 seconds
+        // Start fading in continue button (0 to 1 over 30 seconds)
+        let videoStartTime = Date.now();
+        let continueOpacityInterval = setInterval(() => {
+            const elapsed = (Date.now() - videoStartTime) / 1000; // seconds
+            const opacity = Math.min(elapsed / 30, 1); // 0 to 1 over 30 seconds
+            introContinue.style.opacity = opacity;
+            if (opacity >= 1) clearInterval(continueOpacityInterval);
+        }, 100);
         const mapStartButton = document.getElementById('mapStartButton');
         const playBtn = document.getElementById('playButton');
         const countDownEl = document.getElementById('countdown');
         const gameOverOverlay = document.getElementById('gameOverOverlay');
+        const survivalOverlay = document.getElementById('survivalOverlay');
+        const survivalTimeEl = document.getElementById('survivalTime');
+        const runTimerEl = document.getElementById('runTimer');
+        const gameOverFrames = [
+            'assets/game-end/background_frame_1.PNG',
+            'assets/game-end/background_frame_2.PNG',
+            'assets/game-end/background_frame_3.PNG'
+        ];
+        let gameOverFrameIndex = 0;
+        let gameOverFrameTimer = null;
+        let runElapsedMs = 0;
+        let runTimerRunning = false;
+        let runTimerLastMs = 0;
+
+        function formatRunTime(ms) {
+            let totalSeconds = Math.floor(ms / 1000);
+            let minutes = Math.floor(totalSeconds / 60);
+            let seconds = totalSeconds % 60;
+            let mm = String(minutes).padStart(2, '0');
+            let ss = String(seconds).padStart(2, '0');
+            return `${mm}:${ss}`;
+        }
+
+        function resetRunTimer() {
+            runElapsedMs = 0;
+            runTimerRunning = false;
+            runTimerLastMs = 0;
+            runTimerEl.textContent = '00:00';
+            runTimerEl.classList.add('hidden');
+        }
+
+        function resetGameState() {
+            gameSpeed = 7;
+            verticalSpeed = 0.25;
+            liquidity = 100.00;
+            savings = 0.00;
+            burnRate = 6;
+            frameCount = 0;
+            bgOffset = 0;
+            drunkFrames = 0;
+            gamblingFrames = 0;
+            toxicFrames = 0;
+            shakeFrames = 0;
+            kestrlFrames = 0;
+            magnetActive = false;
+            magnetCharging = 0;
+            magnetCap = 0;
+            maxDrunkDuration = 0;
+            flyingCoins = [];
+            coins = [];
+            currentPattern = null;
+            patternColIndex = 0;
+            spawnTimer = 0;
+            ribaMode = false;
+            ribaRound = 0;
+            inputQueue = [];
+            pixelsTraveled = 0;
+            bird.x = 75;
+            bird.y = LANES[1];
+            bird.targetY = LANES[1];
+            isPlaying = false;
+            isGameOver = false;
+        }
+
+        function startRunTimer() {
+            runTimerRunning = true;
+            runTimerLastMs = performance.now();
+            runTimerEl.classList.remove('hidden');
+        }
+
+        function stopRunTimer() {
+            runTimerRunning = false;
+        }
 
         function showMapScreen() {
             introOverlay.style.display = 'none';
@@ -836,6 +946,7 @@
         function showStartOverlay() {
             mapOverlay.style.display = 'none';
             startOverlay.style.display = 'flex';
+            resetRunTimer();
         }
 
         introProceedButton.addEventListener('click', () => {
@@ -863,10 +974,12 @@
         });
 
         introSkip.addEventListener('click', () => {
+            clearInterval(continueOpacityInterval);
             showMapScreen();
         });
 
         introContinue.addEventListener('click', () => {
+            clearInterval(continueOpacityInterval);
             showMapScreen();
         });
 
@@ -886,7 +999,12 @@
             let timer = setInterval(() => {
                 count--;
                 if(count > 0) { countDownEl.innerText = count; } 
-                else { clearInterval(timer); isPlaying = true; loop(); }
+                else {
+                    clearInterval(timer);
+                    isPlaying = true;
+                    startRunTimer();
+                    loop();
+                }
             }, 500);
         });
 
@@ -894,10 +1012,26 @@
             isGameOver = true;
             isPlaying = false;
             liquidity = 0;
+            stopRunTimer();
             gameOverOverlay.style.display = 'flex';
             const gameOverImage = document.getElementById('gameOverImage');
+            const gameOverButtons = document.querySelectorAll('.gameOverButton, #bankruptcyBadge');
             gameOverImage.classList.remove('fade-in');
-            setTimeout(() => gameOverImage.classList.add('fade-in'), 10);
+            gameOverButtons.forEach(btn => btn.classList.remove('fade-in'));
+            if (gameOverFrameTimer) {
+                clearInterval(gameOverFrameTimer);
+                gameOverFrameTimer = null;
+            }
+            gameOverFrameIndex = 0;
+            gameOverImage.src = gameOverFrames[gameOverFrameIndex];
+            gameOverFrameTimer = setInterval(() => {
+                gameOverFrameIndex = (gameOverFrameIndex + 1) % gameOverFrames.length;
+                gameOverImage.src = gameOverFrames[gameOverFrameIndex];
+            }, 240);
+            setTimeout(() => {
+                gameOverImage.classList.add('fade-in');
+                gameOverButtons.forEach(btn => btn.classList.add('fade-in'));
+            }, 10);
             document.getElementById('btnLoan').onclick = () => {
                 liquidity = 100;
                 burnRate += 2; 
@@ -906,19 +1040,44 @@
                 ribaRound++; // Increase difficulty level
                 resumeGame();
             };
-            document.getElementById('btnSavings').disabled = (savings < 150);
-            document.getElementById('btnSavings').onclick = () => {
+            const btnSavings = document.getElementById('btnSavings');
+            const hasSavings = savings >= 150;
+            btnSavings.disabled = !hasSavings;
+            btnSavings.style.backgroundImage = hasSavings
+                ? "url('assets/game-end/usesavings.png')"
+                : "url('assets/game-end/nosavings.png')";
+            btnSavings.onclick = () => {
                 if(savings >= 150) { savings -= 150; liquidity = 100; resumeGame(); }
             };
-            document.getElementById('btnRestart').onclick = () => { location.reload(); };
+            document.getElementById('btnRestart').onclick = () => {
+                runTimerEl.classList.add('hidden');
+                survivalTimeEl.textContent = `SURVIVED ${formatRunTime(runElapsedMs)}`;
+                survivalOverlay.style.display = 'flex';
+                setTimeout(() => {
+                    if (gameOverFrameTimer) {
+                        clearInterval(gameOverFrameTimer);
+                        gameOverFrameTimer = null;
+                    }
+                    gameOverOverlay.style.display = 'none';
+                    survivalOverlay.style.display = 'none';
+                    resetGameState();
+                    showStartOverlay();
+                }, 5000);
+            };
         }
 
         function resumeGame() {
             gameOverOverlay.style.display = 'none';
             const gameOverImage = document.getElementById('gameOverImage');
             gameOverImage.classList.remove('fade-in');
+            document.querySelectorAll('.gameOverButton, #bankruptcyBadge').forEach(btn => btn.classList.remove('fade-in'));
+            if (gameOverFrameTimer) {
+                clearInterval(gameOverFrameTimer);
+                gameOverFrameTimer = null;
+            }
             isGameOver = false;
             isPlaying = true;
+            startRunTimer();
             loop();
         }
 
