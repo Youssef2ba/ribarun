@@ -41,12 +41,19 @@
         #runTimer.hidden { display: none; }
         #survivalOverlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; background: #000; z-index: 80; }
         #survivalTime { color: #fff; font-size: 40px; font-weight: bold; text-shadow: 0 2px 8px rgba(0,0,0,0.7); }
-        #survivalQuestion { color: #cbd5e1; font-size: 22px; margin-top: 10px; }
-        #survivalActions { display: flex; gap: 12px; margin-top: 12px; }
-        .survivalChoiceBtn { border: none; border-radius: 8px; cursor: pointer; font-weight: bold; padding: 10px 22px; font-size: 16px; }
-        #submitYesBtn { background: #4ade80; color: #012; }
-        #submitNoBtn { background: #334155; color: #fff; }
-        .survivalChoiceBtn:disabled { opacity: 0.55; cursor: not-allowed; }
+        #survivalUserLine { color: #cbd5e1; font-size: 20px; margin-top: 10px; }
+        #survivalContinueBtn {
+            margin-top: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 15px;
+            padding: 10px 16px;
+            background: #4ade80;
+            color: #012;
+            display: none;
+        }
         @keyframes hoverFloat {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-6px); }
@@ -132,7 +139,7 @@
             background: #334155;
             color: #fff;
         }
-        #survivalSubmitStatus { color: #cbd5e1; font-size: 16px; margin-top: 12px; text-align: center; min-height: 20px; }
+        #survivalSubmitStatus { color: #cbd5e1; font-size: 18px; margin-top: 12px; text-align: center; min-height: 20px; white-space: pre-line; }
         /* --- DEBT MODE VIGNETTE --- */
         #debtVignette {
             position: absolute; inset: 0; pointer-events: none; z-index: 80;
@@ -215,12 +222,9 @@
     </div>
     <div id="survivalOverlay">
         <div id="survivalTime">SURVIVED 00:00</div>
-        <div id="survivalQuestion">Submit time as <span id="survivalUsername"></span>?</div>
-        <div id="survivalActions">
-            <button id="submitYesBtn" class="survivalChoiceBtn">YES</button>
-            <button id="submitNoBtn" class="survivalChoiceBtn">NO</button>
-        </div>
+        <div id="survivalUserLine"></div>
         <div id="survivalSubmitStatus"></div>
+        <button id="survivalContinueBtn">CONTINUE</button>
     </div>
     <div id="leaderboardOverlay">
         <div id="leaderboardWrapper">
@@ -247,6 +251,7 @@
         let authMode = 'login';
         let scoreSubmittedForRun = false;
         let pendingSurvivalMs = 0;
+        let latestSubmitResult = null;
 
         const debtVignette = document.getElementById('debtVignette');
         const canvas = document.getElementById('gameCanvas');
@@ -1085,10 +1090,9 @@
         const leaderboardStatusEl = document.getElementById('leaderboardStatus');
         const leaderboardLogoutBtn = document.getElementById('leaderboardLogoutBtn');
         const replayGameBtn = document.getElementById('replayGameBtn');
-        const survivalUsernameEl = document.getElementById('survivalUsername');
-        const submitYesBtn = document.getElementById('submitYesBtn');
-        const submitNoBtn = document.getElementById('submitNoBtn');
+        const survivalUserLineEl = document.getElementById('survivalUserLine');
         const survivalSubmitStatusEl = document.getElementById('survivalSubmitStatus');
+        const survivalContinueBtn = document.getElementById('survivalContinueBtn');
         const startOverlay = document.getElementById('startOverlay');
         const introOverlay = document.getElementById('introOverlay');
         const introVideo = document.getElementById('introVideo');
@@ -1289,7 +1293,11 @@
         }
 
         async function submitBestScore(survivedMs) {
-            if (!supabaseClient || !currentSession?.user?.id || scoreSubmittedForRun) return;
+            if (!supabaseClient || !currentSession?.user?.id) {
+                latestSubmitResult = { status: 'error' };
+                return latestSubmitResult;
+            }
+            if (scoreSubmittedForRun && latestSubmitResult) return latestSubmitResult;
 
             scoreSubmittedForRun = true;
             setSubmitStatus('Submitting score...');
@@ -1303,13 +1311,17 @@
 
             if (readError) {
                 setSubmitStatus('Could not submit score.', true);
-                return;
+                latestSubmitResult = { status: 'error' };
+                return latestSubmitResult;
             }
 
             if (existing && ms <= existing.best_survived_ms) {
-                setSubmitStatus(`Best remains ${formatRunTime(existing.best_survived_ms)}.`);
-                loadLeaderboard();
-                return;
+                latestSubmitResult = {
+                    status: 'kept-best',
+                    survivedMs: ms,
+                    bestMs: existing.best_survived_ms
+                };
+                return latestSubmitResult;
             }
 
             const { error: upsertError } = await supabaseClient
@@ -1322,11 +1334,33 @@
 
             if (upsertError) {
                 setSubmitStatus('Could not submit score.', true);
-                return;
+                latestSubmitResult = { status: 'error' };
+                return latestSubmitResult;
             }
 
-            setSubmitStatus(`Leaderboard updated: ${formatRunTime(ms)}.`);
-            loadLeaderboard();
+            latestSubmitResult = {
+                status: 'new-best',
+                survivedMs: ms,
+                bestMs: ms
+            };
+            return latestSubmitResult;
+        }
+
+        async function processSurvivalSummary() {
+            survivalContinueBtn.style.display = 'none';
+            const result = await submitBestScore(pendingSurvivalMs);
+
+            if (!result || result.status === 'error') {
+                setSubmitStatus('Could not check your best time.');
+            }
+            else if (result.status === 'new-best') {
+                setSubmitStatus(`Well done! ${formatRunTime(result.bestMs)} is your best time.`);
+            }
+            else {
+                setSubmitStatus(`Survived ${formatRunTime(result.survivedMs)}\nYour best time is ${formatRunTime(result.bestMs)}.`);
+            }
+
+            survivalContinueBtn.style.display = 'inline-block';
         }
 
         async function handleLogin() {
@@ -1352,7 +1386,7 @@
             currentSession = data.session;
             const profile = await loadCurrentProfile();
             currentUsername = profile?.username || (email.split('@')[0] || 'player');
-            accountNameEl.textContent = `@${currentUsername}`;
+            accountNameEl.textContent = `${currentUsername}`;
             setAuthStatus('');
             enterSignedInMode();
         }
@@ -1491,7 +1525,9 @@
             isPlaying = false;
             isGameOver = false;
             scoreSubmittedForRun = false;
+            latestSubmitResult = null;
             setSubmitStatus('');
+            survivalContinueBtn.style.display = 'none';
         }
 
         function startRunTimer() {
@@ -1584,20 +1620,6 @@
             enterSignedOutMode('Logged out.');
         });
 
-        submitYesBtn.addEventListener('click', async () => {
-            submitYesBtn.disabled = true;
-            submitNoBtn.disabled = true;
-            await submitBestScore(pendingSurvivalMs);
-            await showLeaderboardScreen();
-            submitYesBtn.disabled = false;
-            submitNoBtn.disabled = false;
-        });
-
-        submitNoBtn.addEventListener('click', async () => {
-            setSubmitStatus('Score not submitted.');
-            await showLeaderboardScreen();
-        });
-
         replayGameBtn.addEventListener('click', () => {
             leaderboardOverlay.style.display = 'none';
             resetGameState();
@@ -1609,6 +1631,10 @@
             await supabaseClient.auth.signOut();
             resetGameState();
             enterSignedOutMode('Logged out.');
+        });
+
+        survivalContinueBtn.addEventListener('click', () => {
+            showLeaderboardScreen();
         });
 
         // Since Streamable iframes don't fire 'ended' events, we'll use a timeout
@@ -1685,15 +1711,17 @@
                 pendingSurvivalMs = runElapsedMs;
                 runTimerEl.classList.add('hidden');
                 survivalTimeEl.textContent = `SURVIVED ${formatRunTime(pendingSurvivalMs)}`;
-                survivalUsernameEl.textContent = `$${currentUsername || 'player'}`;
+                survivalUserLineEl.textContent = `Username: ${currentUsername || 'player'}`;
                 setSubmitStatus('');
                 scoreSubmittedForRun = false;
+                latestSubmitResult = null;
                 if (gameOverFrameTimer) {
                     clearInterval(gameOverFrameTimer);
                     gameOverFrameTimer = null;
                 }
                 gameOverOverlay.style.display = 'none';
                 survivalOverlay.style.display = 'flex';
+                processSurvivalSummary();
             };
         }
 
