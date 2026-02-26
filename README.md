@@ -209,3 +209,44 @@ When modifying mechanics:
 - **Function names are verbs** (`triggerGameOver()`, `resumeGame()`)
 - **Constants use SCREAMING_SNAKE_CASE**
 - **Game state is mutable global variables** - No module system
+  
+#333333333333333333D3333333333R23# Supabase Auth + Leaderboard Setup
+
+This project now supports:
+- Required sign-in before gameplay
+- Email/password sign-up and login
+- Unique username per player
+- Best survival-time leaderboard (one row per user)
+
+### 1) Create database objects
+
+In Supabase SQL Editor, run:
+
+- [supabase/schema.sql](supabase/schema.sql)
+
+### 2) Configure Supabase keys in browser
+
+Before loading [index.html](index.html), define global values:
+
+```html
+<script>
+    window.SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co'
+    window.SUPABASE_ANON_KEY = 'YOUR_PUBLIC_ANON_KEY'
+</script>
+```
+
+Then load the game page normally.
+
+### 3) Email confirmation note
+
+For the smoothest signup flow in this MVP, disable email confirmation in Supabase Auth settings, or keep it enabled and have users verify email before logging in.
+
+### 4) Tables used by frontend
+
+- `player_profiles`
+    - Stores `user_id`, `username`, `username_normalized`
+    - Enforces global uniqueness on username
+
+- `leaderboard_best`
+    - Stores one best run per user with `best_survived_ms`
+    - Frontend updates only when new time is better

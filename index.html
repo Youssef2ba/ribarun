@@ -10,7 +10,7 @@
         #startOverlay, #gameOverOverlay { position: absolute; inset: 0; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); z-index: 50; flex-direction: column; }
         #startOverlay { display: none; }
         #gameOverOverlay { display: none; background: rgba(0,0,0,0.85); color: #fff; }
-        #introOverlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); z-index: 60; flex-direction: column; }
+        #introOverlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); z-index: 60; flex-direction: column; }
         #introWrapper { position: relative; width: 897px; height: 600px; }
         #introVideo { width: 100%; height: 100%; display: block; object-fit: cover; background: #000; }
         #introPlayButton { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: rgba(74, 222, 128, 0.9); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); transition: all 0.3s; }
@@ -39,8 +39,14 @@
         #bankruptcyBadge.fade-in { opacity: 1; }
         #runTimer { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 28px; font-weight: bold; text-shadow: 0 2px 8px rgba(0,0,0,0.7); z-index: 70; pointer-events: none; }
         #runTimer.hidden { display: none; }
-        #survivalOverlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: #000; z-index: 80; }
+        #survivalOverlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; background: #000; z-index: 80; }
         #survivalTime { color: #fff; font-size: 40px; font-weight: bold; text-shadow: 0 2px 8px rgba(0,0,0,0.7); }
+        #survivalQuestion { color: #cbd5e1; font-size: 22px; margin-top: 10px; }
+        #survivalActions { display: flex; gap: 12px; margin-top: 12px; }
+        .survivalChoiceBtn { border: none; border-radius: 8px; cursor: pointer; font-weight: bold; padding: 10px 22px; font-size: 16px; }
+        #submitYesBtn { background: #4ade80; color: #012; }
+        #submitNoBtn { background: #334155; color: #fff; }
+        .survivalChoiceBtn:disabled { opacity: 0.55; cursor: not-allowed; }
         @keyframes hoverFloat {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-6px); }
@@ -53,6 +59,80 @@
         .secondary { background: #e2e8f0; color: #022; } 
         .ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); } 
         .gameOverBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+        #authOverlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.92); z-index: 100; }
+        #authCard { width: 100%; max-width: 420px; background: #111; border: 1px solid #333; border-radius: 12px; padding: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.45); }
+        #authTitle { color: #4ade80; font-size: 28px; margin: 0 0 8px; text-align: center; }
+        #authSubtitle { color: #ccc; font-size: 14px; text-align: center; margin: 0 0 16px; }
+        .authField { display: flex; flex-direction: column; margin-bottom: 10px; }
+        .authField label { color: #cbd5e1; font-size: 13px; margin-bottom: 6px; }
+        .authField input { background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+        .authField input:focus { outline: none; border-color: #4ade80; }
+        #authUsernameField { display: none; }
+        #authPrimaryBtn, #authToggleBtn, #logoutBtn {
+            border: none; border-radius: 8px; cursor: pointer; font-weight: bold;
+        }
+        #authPrimaryBtn { width: 100%; margin-top: 8px; padding: 12px 16px; background: #4ade80; color: #012; font-size: 16px; }
+        #authPrimaryBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+        #authToggleBtn { margin-top: 10px; width: 100%; padding: 10px 16px; background: #1f2937; color: #e5e7eb; font-size: 13px; }
+        #authStatus { min-height: 18px; margin-top: 12px; color: #f8fafc; font-size: 13px; text-align: center; }
+        #accountPanel { position: absolute; top: 12px; right: 12px; display: flex; gap: 10px; align-items: center; z-index: 4; }
+        #accountName { color: #fff; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.25); border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+        #logoutBtn { padding: 8px 12px; background: #4ade80; color: #012; font-size: 12px; }
+        #leaderboardOverlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); z-index: 85; }
+        #leaderboardWrapper {
+            position: relative;
+            width: 897px;
+            height: 600px;
+            background: #101010;
+            border: 4px solid #4ade80;
+            box-sizing: border-box;
+            padding: 22px;
+        }
+        #leaderboardTitle { color: #4ade80; font-size: 28px; font-weight: bold; margin-bottom: 10px; }
+        #leaderboardList {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            color: #fff;
+            font-size: 16px;
+            max-height: 455px;
+            overflow-y: auto;
+            border-top: 1px solid rgba(255,255,255,0.15);
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+        #leaderboardList li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 10px 6px;
+        }
+        #leaderboardList li:last-child { border-bottom: none; }
+        #leaderboardStatus { color: #cbd5e1; font-size: 13px; margin-top: 8px; min-height: 18px; }
+        #leaderboardActionRow {
+            position: absolute;
+            right: 22px;
+            bottom: 18px;
+            display: flex;
+            gap: 10px;
+        }
+        #replayGameBtn, #leaderboardLogoutBtn {
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 15px;
+            padding: 10px 16px;
+        }
+        #replayGameBtn {
+            background: #4ade80;
+            color: #012;
+        }
+        #leaderboardLogoutBtn {
+            background: #334155;
+            color: #fff;
+        }
+        #survivalSubmitStatus { color: #cbd5e1; font-size: 16px; margin-top: 12px; text-align: center; min-height: 20px; }
         /* --- DEBT MODE VIGNETTE --- */
         #debtVignette {
             position: absolute; inset: 0; pointer-events: none; z-index: 80;
@@ -76,6 +156,28 @@
 
     <canvas id="gameCanvas" width="897" height="600"></canvas>
 
+    <div id="authOverlay">
+        <div id="authCard">
+            <h1 id="authTitle">RibaRun Access</h1>
+            <p id="authSubtitle">Sign in to play and submit your survival time leaderboard score.</p>
+            <div class="authField" id="authUsernameField">
+                <label for="authUsernameInput">Username</label>
+                <input id="authUsernameInput" type="text" maxlength="20" autocomplete="username" placeholder="Choose a unique username">
+            </div>
+            <div class="authField">
+                <label for="authEmailInput">Email</label>
+                <input id="authEmailInput" type="email" autocomplete="email" placeholder="you@example.com">
+            </div>
+            <div class="authField">
+                <label for="authPasswordInput">Password</label>
+                <input id="authPasswordInput" type="password" autocomplete="current-password" placeholder="••••••••">
+            </div>
+            <button id="authPrimaryBtn">LOG IN</button>
+            <button id="authToggleBtn">Need an account? Sign up</button>
+            <div id="authStatus"></div>
+        </div>
+    </div>
+
     <div id="introOverlay">
         <div id="introWrapper">
             <iframe id="introVideo" src="https://streamable.com/e/tmrbbx" frameborder="0" scrolling="no" allowfullscreen style="width:100%; height:100%; display:block;"></iframe>
@@ -89,6 +191,10 @@
     <div id="mapOverlay">
         <div id="mapWrapper">
             <img id="mapImage" src="assets/map/main_map.PNG" alt="Game Map">
+            <div id="accountPanel">
+                <div id="accountName"></div>
+                <button id="logoutBtn">LOG OUT</button>
+            </div>
             <button id="mapStartButton">START RUN</button>
         </div>
     </div>
@@ -109,11 +215,39 @@
     </div>
     <div id="survivalOverlay">
         <div id="survivalTime">SURVIVED 00:00</div>
+        <div id="survivalQuestion">Submit time as <span id="survivalUsername"></span>?</div>
+        <div id="survivalActions">
+            <button id="submitYesBtn" class="survivalChoiceBtn">YES</button>
+            <button id="submitNoBtn" class="survivalChoiceBtn">NO</button>
+        </div>
+        <div id="survivalSubmitStatus"></div>
+    </div>
+    <div id="leaderboardOverlay">
+        <div id="leaderboardWrapper">
+            <div id="leaderboardTitle">Leaderboard</div>
+            <ol id="leaderboardList"></ol>
+            <div id="leaderboardStatus"></div>
+            <div id="leaderboardActionRow">
+                <button id="leaderboardLogoutBtn">LOG OUT</button>
+                <button id="replayGameBtn">REPLAY GAME</button>
+            </div>
+        </div>
     </div>
     <div id="debtVignette"></div>
     <div id="runTimer" class="hidden">00:00</div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script>
+        const SUPABASE_URL = window.SUPABASE_URL || 'https://dzsuzrmdlojgtleqxedl.supabase.co';
+        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6c3V6cm1kbG9qZ3RsZXF4ZWRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNDMyMjQsImV4cCI6MjA4NzYxOTIyNH0.vh8rpbiZDHKemHdt3Q71F-HRkHUpgwhd4OS9U9HDqJ8';
+
+        let supabaseClient = null;
+        let currentSession = null;
+        let currentUsername = '';
+        let authMode = 'login';
+        let scoreSubmittedForRun = false;
+        let pendingSurvivalMs = 0;
+
         const debtVignette = document.getElementById('debtVignette');
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -936,6 +1070,25 @@
             }
         }
 
+        const authOverlay = document.getElementById('authOverlay');
+        const authUsernameField = document.getElementById('authUsernameField');
+        const authUsernameInput = document.getElementById('authUsernameInput');
+        const authEmailInput = document.getElementById('authEmailInput');
+        const authPasswordInput = document.getElementById('authPasswordInput');
+        const authPrimaryBtn = document.getElementById('authPrimaryBtn');
+        const authToggleBtn = document.getElementById('authToggleBtn');
+        const authStatus = document.getElementById('authStatus');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const accountNameEl = document.getElementById('accountName');
+        const leaderboardOverlay = document.getElementById('leaderboardOverlay');
+        const leaderboardListEl = document.getElementById('leaderboardList');
+        const leaderboardStatusEl = document.getElementById('leaderboardStatus');
+        const leaderboardLogoutBtn = document.getElementById('leaderboardLogoutBtn');
+        const replayGameBtn = document.getElementById('replayGameBtn');
+        const survivalUsernameEl = document.getElementById('survivalUsername');
+        const submitYesBtn = document.getElementById('submitYesBtn');
+        const submitNoBtn = document.getElementById('submitNoBtn');
+        const survivalSubmitStatusEl = document.getElementById('survivalSubmitStatus');
         const startOverlay = document.getElementById('startOverlay');
         const introOverlay = document.getElementById('introOverlay');
         const introVideo = document.getElementById('introVideo');
@@ -970,6 +1123,324 @@
         let runElapsedMs = 0;
         let runTimerRunning = false;
         let runTimerLastMs = 0;
+
+        function normalizeUsername(name) {
+            return (name || '').trim().replace(/\s+/g, '_').toLowerCase();
+        }
+
+        function isUsernameValid(name) {
+            return /^[a-zA-Z0-9_]{3,20}$/.test(name || '');
+        }
+
+        function setAuthStatus(message, isError = false) {
+            authStatus.textContent = message || '';
+            authStatus.style.color = isError ? '#f87171' : '#f8fafc';
+        }
+
+        function setLeaderboardStatus(message, isError = false) {
+            leaderboardStatusEl.textContent = message || '';
+            leaderboardStatusEl.style.color = isError ? '#fca5a5' : '#cbd5e1';
+        }
+
+        function setSubmitStatus(message, isError = false) {
+            survivalSubmitStatusEl.textContent = message || '';
+            survivalSubmitStatusEl.style.color = isError ? '#fca5a5' : '#cbd5e1';
+        }
+
+        function setAuthBusy(isBusy) {
+            authPrimaryBtn.disabled = isBusy;
+            authToggleBtn.disabled = isBusy;
+        }
+
+        function setAuthMode(mode) {
+            authMode = mode;
+            const signup = authMode === 'signup';
+            authUsernameField.style.display = signup ? 'flex' : 'none';
+            authPrimaryBtn.textContent = signup ? 'SIGN UP' : 'LOG IN';
+            authToggleBtn.textContent = signup ? 'Already have an account? Log in' : 'Need an account? Sign up';
+            authPasswordInput.setAttribute('autocomplete', signup ? 'new-password' : 'current-password');
+            setAuthStatus('');
+        }
+
+        function hideAllGameOverlays() {
+            introOverlay.style.display = 'none';
+            mapOverlay.style.display = 'none';
+            startOverlay.style.display = 'none';
+            gameOverOverlay.style.display = 'none';
+            survivalOverlay.style.display = 'none';
+            leaderboardOverlay.style.display = 'none';
+            runTimerEl.classList.add('hidden');
+        }
+
+        function enterSignedOutMode(message = '') {
+            hideAllGameOverlays();
+            isPlaying = false;
+            isGameOver = false;
+            authOverlay.style.display = 'flex';
+            setAuthStatus(message);
+            accountNameEl.textContent = '';
+            currentUsername = '';
+            currentSession = null;
+            setSubmitStatus('');
+        }
+
+        function enterSignedInMode() {
+            authOverlay.style.display = 'none';
+            showIntroScreen();
+        }
+
+        function showIntroScreen() {
+            hideAllGameOverlays();
+            introOverlay.style.display = 'flex';
+            setSubmitStatus('');
+        }
+
+        function renderLeaderboardRows(rows) {
+            leaderboardListEl.innerHTML = '';
+
+            if (!rows || rows.length === 0) {
+                const emptyItem = document.createElement('li');
+                emptyItem.textContent = 'No scores yet';
+                leaderboardListEl.appendChild(emptyItem);
+                return;
+            }
+
+            rows.forEach((row, index) => {
+                const item = document.createElement('li');
+                const left = document.createElement('span');
+                const right = document.createElement('span');
+                left.textContent = `${index + 1}. ${row.username_snapshot}`;
+                right.textContent = formatRunTime(row.best_survived_ms);
+                item.appendChild(left);
+                item.appendChild(right);
+                leaderboardListEl.appendChild(item);
+            });
+        }
+
+        async function showLeaderboardScreen() {
+            survivalOverlay.style.display = 'none';
+            leaderboardOverlay.style.display = 'flex';
+            await loadLeaderboard();
+        }
+
+        async function loadLeaderboard() {
+            if (!supabaseClient) return;
+
+            setLeaderboardStatus('Loading leaderboard...');
+            const { data, error } = await supabaseClient
+                .from('leaderboard_best')
+                .select('username_snapshot,best_survived_ms,updated_at')
+                .order('best_survived_ms', { ascending: false })
+                .order('updated_at', { ascending: true })
+                .limit(10);
+
+            if (error) {
+                renderLeaderboardRows([]);
+                setLeaderboardStatus('Could not load leaderboard.', true);
+                return;
+            }
+
+            renderLeaderboardRows(data || []);
+            setLeaderboardStatus('');
+        }
+
+        async function loadCurrentProfile() {
+            if (!supabaseClient || !currentSession?.user?.id) return null;
+
+            const { data, error } = await supabaseClient
+                .from('player_profiles')
+                .select('username')
+                .eq('user_id', currentSession.user.id)
+                .maybeSingle();
+
+            if (error) return null;
+            return data;
+        }
+
+        async function upsertCurrentProfile(username) {
+            if (!supabaseClient || !currentSession?.user?.id) {
+                throw new Error('Not authenticated.');
+            }
+
+            const normalized = normalizeUsername(username);
+            const clean = (username || '').trim();
+
+            if (!isUsernameValid(clean)) {
+                throw new Error('Username must be 3-20 characters (letters, numbers, underscore).');
+            }
+
+            const { error } = await supabaseClient
+                .from('player_profiles')
+                .upsert({
+                    user_id: currentSession.user.id,
+                    username: clean,
+                    username_normalized: normalized
+                }, { onConflict: 'user_id' });
+
+            if (error) {
+                if (error.code === '23505') {
+                    throw new Error('Username already taken. Choose another one.');
+                }
+                throw new Error(error.message || 'Could not save username.');
+            }
+
+            currentUsername = clean;
+            accountNameEl.textContent = currentUsername;
+        }
+
+        async function submitBestScore(survivedMs) {
+            if (!supabaseClient || !currentSession?.user?.id || scoreSubmittedForRun) return;
+
+            scoreSubmittedForRun = true;
+            setSubmitStatus('Submitting score...');
+
+            const ms = Math.max(0, Math.floor(survivedMs));
+            const { data: existing, error: readError } = await supabaseClient
+                .from('leaderboard_best')
+                .select('best_survived_ms')
+                .eq('user_id', currentSession.user.id)
+                .maybeSingle();
+
+            if (readError) {
+                setSubmitStatus('Could not submit score.', true);
+                return;
+            }
+
+            if (existing && ms <= existing.best_survived_ms) {
+                setSubmitStatus(`Best remains ${formatRunTime(existing.best_survived_ms)}.`);
+                loadLeaderboard();
+                return;
+            }
+
+            const { error: upsertError } = await supabaseClient
+                .from('leaderboard_best')
+                .upsert({
+                    user_id: currentSession.user.id,
+                    username_snapshot: currentUsername,
+                    best_survived_ms: ms
+                }, { onConflict: 'user_id' });
+
+            if (upsertError) {
+                setSubmitStatus('Could not submit score.', true);
+                return;
+            }
+
+            setSubmitStatus(`Leaderboard updated: ${formatRunTime(ms)}.`);
+            loadLeaderboard();
+        }
+
+        async function handleLogin() {
+            const email = authEmailInput.value.trim();
+            const password = authPasswordInput.value;
+
+            if (!email || !password) {
+                setAuthStatus('Enter your email and password.', true);
+                return;
+            }
+
+            setAuthBusy(true);
+            setAuthStatus('Logging in...');
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+            setAuthBusy(false);
+            if (error) {
+                setAuthStatus(error.message || 'Login failed.', true);
+                return;
+            }
+
+            currentSession = data.session;
+            const profile = await loadCurrentProfile();
+            currentUsername = profile?.username || (email.split('@')[0] || 'player');
+            accountNameEl.textContent = `@${currentUsername}`;
+            setAuthStatus('');
+            enterSignedInMode();
+        }
+
+        async function handleSignup() {
+            const username = authUsernameInput.value.trim();
+            const email = authEmailInput.value.trim();
+            const password = authPasswordInput.value;
+
+            if (!isUsernameValid(username)) {
+                setAuthStatus('Username must be 3-20 characters (letters, numbers, underscore).', true);
+                return;
+            }
+            if (!email || !password || password.length < 6) {
+                setAuthStatus('Enter valid email and password (min 6 chars).', true);
+                return;
+            }
+
+            setAuthBusy(true);
+            setAuthStatus('Creating account...');
+
+            const { data, error } = await supabaseClient.auth.signUp({ email, password });
+            if (error) {
+                setAuthBusy(false);
+                setAuthStatus(error.message || 'Sign up failed.', true);
+                return;
+            }
+
+            if (!data.session) {
+                setAuthBusy(false);
+                setAuthStatus('Check your email for verification, then log in.');
+                setAuthMode('login');
+                return;
+            }
+
+            currentSession = data.session;
+            try {
+                await upsertCurrentProfile(username);
+            } catch (profileError) {
+                setAuthBusy(false);
+                setAuthStatus(profileError.message, true);
+                await supabaseClient.auth.signOut();
+                enterSignedOutMode('Sign up created, but username failed. Try another username.');
+                return;
+            }
+
+            setAuthBusy(false);
+            setAuthStatus('');
+            enterSignedInMode();
+        }
+
+        async function initializeAuth() {
+            if (!window.supabase?.createClient || SUPABASE_URL.includes('YOUR_SUPABASE') || SUPABASE_ANON_KEY.includes('YOUR_SUPABASE')) {
+                enterSignedOutMode('Set SUPABASE_URL and SUPABASE_ANON_KEY in window before loading the game.');
+                authPrimaryBtn.disabled = true;
+                authToggleBtn.disabled = true;
+                return;
+            }
+
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+            const { data: sessionData } = await supabaseClient.auth.getSession();
+            currentSession = sessionData.session;
+
+            supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+                currentSession = session;
+                if (!session) {
+                    enterSignedOutMode('Session ended. Please log in again.');
+                    return;
+                }
+                const profile = await loadCurrentProfile();
+                currentUsername = profile?.username || (session.user?.email?.split('@')[0] || 'player');
+                accountNameEl.textContent = `@${currentUsername}`;
+                if (authOverlay.style.display !== 'none') {
+                    enterSignedInMode();
+                }
+            });
+
+            if (!currentSession) {
+                enterSignedOutMode('Log in or sign up to play.');
+                return;
+            }
+
+            const profile = await loadCurrentProfile();
+            currentUsername = profile?.username || (currentSession.user?.email?.split('@')[0] || 'player');
+            accountNameEl.textContent = `@${currentUsername}`;
+            enterSignedInMode();
+        }
 
         function formatRunTime(ms) {
             let totalSeconds = Math.floor(ms / 1000);
@@ -1019,6 +1490,8 @@
             bird.targetY = LANES[1];
             isPlaying = false;
             isGameOver = false;
+            scoreSubmittedForRun = false;
+            setSubmitStatus('');
         }
 
         function startRunTimer() {
@@ -1032,6 +1505,10 @@
         }
 
         function showMapScreen() {
+            if (!currentSession) {
+                enterSignedOutMode('Log in or sign up to continue.');
+                return;
+            }
             introOverlay.style.display = 'none';
             mapOverlay.style.display = 'flex';
         }
@@ -1076,6 +1553,64 @@
             showMapScreen();
         });
 
+        authPrimaryBtn.addEventListener('click', async () => {
+            if (!supabaseClient) {
+                setAuthStatus('Supabase is not configured.', true);
+                return;
+            }
+            if (authMode === 'signup') {
+                await handleSignup();
+            } else {
+                await handleLogin();
+            }
+        });
+
+        authToggleBtn.addEventListener('click', () => {
+            setAuthMode(authMode === 'signup' ? 'login' : 'signup');
+        });
+
+        [authUsernameInput, authEmailInput, authPasswordInput].forEach(input => {
+            input.addEventListener('keydown', async (event) => {
+                if (event.key !== 'Enter') return;
+                event.preventDefault();
+                authPrimaryBtn.click();
+            });
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            if (!supabaseClient) return;
+            await supabaseClient.auth.signOut();
+            resetGameState();
+            enterSignedOutMode('Logged out.');
+        });
+
+        submitYesBtn.addEventListener('click', async () => {
+            submitYesBtn.disabled = true;
+            submitNoBtn.disabled = true;
+            await submitBestScore(pendingSurvivalMs);
+            await showLeaderboardScreen();
+            submitYesBtn.disabled = false;
+            submitNoBtn.disabled = false;
+        });
+
+        submitNoBtn.addEventListener('click', async () => {
+            setSubmitStatus('Score not submitted.');
+            await showLeaderboardScreen();
+        });
+
+        replayGameBtn.addEventListener('click', () => {
+            leaderboardOverlay.style.display = 'none';
+            resetGameState();
+            showStartOverlay();
+        });
+
+        leaderboardLogoutBtn.addEventListener('click', async () => {
+            if (!supabaseClient) return;
+            await supabaseClient.auth.signOut();
+            resetGameState();
+            enterSignedOutMode('Logged out.');
+        });
+
         // Since Streamable iframes don't fire 'ended' events, we'll use a timeout
         // Assuming the video is about 30-60 seconds, set timeout to pause after expected duration
         setTimeout(() => {
@@ -1086,6 +1621,10 @@
         // introVideo.volume = 1;
 
         playBtn.addEventListener('click', () => {
+            if (!currentSession) {
+                enterSignedOutMode('Log in to start a run.');
+                return;
+            }
             startOverlay.style.display = 'none';
             let count = 3;
             countDownEl.innerText = count;
@@ -1143,19 +1682,18 @@
                 if(savings >= 150) { savings -= 150; liquidity = 100; resumeGame(); }
             };
             document.getElementById('btnRestart').onclick = () => {
+                pendingSurvivalMs = runElapsedMs;
                 runTimerEl.classList.add('hidden');
-                survivalTimeEl.textContent = `SURVIVED ${formatRunTime(runElapsedMs)}`;
+                survivalTimeEl.textContent = `SURVIVED ${formatRunTime(pendingSurvivalMs)}`;
+                survivalUsernameEl.textContent = `$${currentUsername || 'player'}`;
+                setSubmitStatus('');
+                scoreSubmittedForRun = false;
+                if (gameOverFrameTimer) {
+                    clearInterval(gameOverFrameTimer);
+                    gameOverFrameTimer = null;
+                }
+                gameOverOverlay.style.display = 'none';
                 survivalOverlay.style.display = 'flex';
-                setTimeout(() => {
-                    if (gameOverFrameTimer) {
-                        clearInterval(gameOverFrameTimer);
-                        gameOverFrameTimer = null;
-                    }
-                    gameOverOverlay.style.display = 'none';
-                    survivalOverlay.style.display = 'none';
-                    resetGameState();
-                    showStartOverlay();
-                }, 5000);
             };
         }
 
@@ -1173,6 +1711,9 @@
             startRunTimer();
             loop();
         }
+
+        setAuthMode('login');
+        initializeAuth();
 
     </script>
 </body>
