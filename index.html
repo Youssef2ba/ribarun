@@ -8,7 +8,21 @@
         
         /* UI OVERLAYS */
         #startOverlay, #gameOverOverlay { position: absolute; inset: 0; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); z-index: 50; flex-direction: column; }
-        #startOverlay { display: none; }
+        #startOverlay { display: none; background: rgba(0,0,0,0.9); }
+        #startWrapper { 
+            position: relative; 
+            width: 897px; 
+            height: 600px; 
+            background-image: url('assets/startsc/background_startscreen.png'); 
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat;
+            border: 4px solid #4ade80;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
         #gameOverOverlay { display: none; background: rgba(0,0,0,0.85); color: #fff; }
         #introOverlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); z-index: 60; flex-direction: column; }
         #introWrapper { position: relative; width: 897px; height: 600px; }
@@ -23,6 +37,15 @@
         #mapWrapper { position: relative; width: 897px; height: 600px; background: #202020; border: 4px solid #4ade80; }
         #mapImage { width: 100%; height: 100%; object-fit: cover; }
         #mapStartButton { position: absolute; bottom: 27%; left: 1%; transform: translate(0, 0); background: transparent; border: none; cursor: pointer; width: 220px; height: 80px; background-image: url('assets/map/riba_run.png'); background-size: contain; background-repeat: no-repeat; background-position: center; color: transparent; font-size: 0; box-shadow: none; }
+        #tutorialOverlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); z-index: 57; flex-direction: column; }
+        #tutorialWrapper { position: relative; width: 897px; height: 600px; background: #202020; border: 4px solid #4ade80; }
+        #tutorialImage { width: 100%; height: 100%; object-fit: contain; opacity: 0; animation: fadeInTutorial 1.5s ease-in forwards; }
+        #tutorialNextButton { position: absolute; bottom: 30px; right: 30px; background: transparent; border: none; cursor: pointer; background-image: url('assets/tutorial/next.png'); background-size: contain; background-repeat: no-repeat; background-position: center; width: 210px; height: 70px; transition: transform 0.3s; z-index: 10; color: transparent; font-size: 0; }
+        #tutorialNextButton:hover { transform: scale(1.05); }
+        @keyframes fadeInTutorial {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
         #introSkip { position: absolute; top: 20px; right: 20px; background: #4ade80; color: #012; border: none; font-weight: bold; padding: 12px 20px; font-size: 14px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.3s; z-index: 10; }
         #introSkip:hover { background: #3bc46f; }
         #introContinue { position: absolute; top: 75px; right: 20px; background: #4ade80; color: #012; border: none; font-weight: bold; padding: 12px 20px; font-size: 14px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: opacity 0.3s; opacity: 0; z-index: 10; }
@@ -30,11 +53,29 @@
         #gameOverWrapper { position: relative; max-width: 897px; width: 134.55%; }
         #gameOverImage { width: 100%; opacity: 0; transition: opacity 2s ease-in; margin-bottom: 20px; animation: hoverFloat 3.6s ease-in-out infinite; }
         #gameOverImage.fade-in { opacity: 1; }
+            #gameOverMessage {
+                position: absolute;
+                top: 16%;
+                left: 50%;
+                width: 58%;
+                transform: translateX(-50%);
+                color: #fff7d6;
+                font-size: 26px;
+                font-weight: 700;
+                line-height: 1.25;
+                text-align: center;
+                text-shadow: 0 3px 10px rgba(0,0,0,0.85);
+                opacity: 0;
+                transition: opacity 2s ease-in;
+                pointer-events: none;
+                z-index: 2;
+            }
+            #gameOverMessage.fade-in { opacity: 1; }
         .gameOverButton { position: absolute; background: transparent; border: none; cursor: pointer; padding: 0; opacity: 0; transition: opacity 2s ease-in; animation: hoverFloat 3.2s ease-in-out infinite; }
         .gameOverButton.fade-in { opacity: 1; }
         #btnLoan { left: 20%; top: calc(45% - 70px); width: calc(10% + 20px); height: calc(15% + 150px); background-image: url('assets/game-end/takeloan.png'); background-size: 300% auto; background-repeat: no-repeat; background-position: center; }
         #btnSavings { right: 20%; top: calc(45% - 70px); width: calc(10% + 20px); height: calc(15% + 150px); background-image: url('assets/game-end/usesavings.png'); background-size: 300% auto; background-repeat: no-repeat; background-position: center; }
-        #btnRestart { right: 18%; bottom: 10%; width: 15%; height: 10%; }
+        #btnRestart { right: 3%; bottom: 5%; width: 15%; height: 10%; background-image: url('assets/game-end/give_up.png'); background-size: 115% auto; background-repeat: no-repeat; background-position: center; }
         #bankruptcyBadge { position: absolute; right: -4%; bottom: -2%; width: 21.6%; height: auto; opacity: 0; transition: opacity 2s ease-in; animation: hoverFloat 3.8s ease-in-out infinite; }
         #bankruptcyBadge.fade-in { opacity: 1; }
         #runTimer { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 28px; font-weight: bold; text-shadow: 0 2px 8px rgba(0,0,0,0.7); z-index: 70; pointer-events: none; }
@@ -58,30 +99,143 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-6px); }
         }
-        #playButton { background: #4ade80; border: none; color: #012; font-weight: bold; padding: 18px 32px; font-size: 28px; border-radius: 8px; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,0.3); }
-        #countdown { margin-top: 18px; font-size: 64px; color: #fff; font-weight: bold; text-shadow: 0 2px 6px rgba(0,0,0,0.6); }
+        .startButton { 
+            background: transparent; 
+            border: none; 
+            cursor: pointer; 
+            background-size: cover; 
+            background-repeat: no-repeat; 
+            background-position: center; 
+            width: 220px; 
+            height: 60px; 
+            margin: 12px 0;
+            transition: transform 0.2s; 
+        }
+        .startButton:hover { transform: scale(1.05); }
+        #startRunButton { background-image: url('assets/startsc/start_run.png'); }
+        #customiseButton { background-image: url('assets/startsc/customise.png'); }
+        #settingsButton { background-image: url('assets/startsc/settings.png'); }
+        #countdown {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 132px;
+            color: #fff;
+            font-weight: bold;
+            text-shadow: 0 6px 18px rgba(0,0,0,0.7);
+            z-index: 80;
+            pointer-events: none;
+        }
+        #countdown.active { display: flex; }
         #gameOverCard { background: #111; padding: 28px; border-radius: 12px; text-align: center; min-width: 320px; border: 1px solid #333; }
         .gameOverBtn { margin: 8px 6px; padding: 10px 16px; font-size: 16px; border-radius: 8px; border: none; cursor: pointer; }
         .primary { background: #4ade80; color: #022; } 
         .secondary { background: #e2e8f0; color: #022; } 
         .ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); } 
         .gameOverBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-        #authOverlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.92); z-index: 100; }
-        #authCard { width: 100%; max-width: 420px; background: #111; border: 1px solid #333; border-radius: 12px; padding: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.45); }
-        #authTitle { color: #4ade80; font-size: 28px; margin: 0 0 8px; text-align: center; }
-        #authSubtitle { color: #ccc; font-size: 14px; text-align: center; margin: 0 0 16px; }
-        .authField { display: flex; flex-direction: column; margin-bottom: 10px; }
-        .authField label { color: #cbd5e1; font-size: 13px; margin-bottom: 6px; }
-        .authField input { background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 8px; padding: 10px 12px; font-size: 14px; }
-        .authField input:focus { outline: none; border-color: #4ade80; }
-        #authUsernameField { display: none; }
+        #authOverlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.88); z-index: 100; }
+        #authCard {
+            /* Adjust these to move and resize the 3 stacked input boxes */
+            --auth-fields-top: 270px;
+            --auth-fields-left: 375px;
+            --auth-field-width: 350px;
+            --auth-field-gap: 17px;
+            --auth-field-height: 32px;
+            --auth-field-font-size: 12px;
+            --auth-field-padding-y: 4px;
+            --auth-field-padding-x: 12px;
+            /* Adjust these to move the login/signup image buttons */
+            --auth-buttons-top: 418px;
+            --auth-buttons-left: 258px;
+            --auth-button-width: 182px;
+            --auth-button-height: 56px;
+            --auth-button-gap: 16px;
+
+            position: relative;
+            width: 897px;
+            height: 600px;
+            background-image: url('assets/signup/mainscreen.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: 4px solid #4ade80;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        #authTitle, #authSubtitle {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        #authFieldsStack {
+            position: absolute;
+            top: var(--auth-fields-top);
+            left: var(--auth-fields-left);
+            width: var(--auth-field-width);
+        }
+        .authField { display: flex; flex-direction: column; margin: 0; }
+        #authFieldsStack .authField + .authField { margin-top: var(--auth-field-gap); }
+        .authField label { display: none; }
+        .authField input {
+            width: 100%;
+            height: var(--auth-field-height);
+            box-sizing: border-box;
+            background: transparent;
+            border: none;
+            color: #fff;
+            border-radius: 10px;
+            padding: var(--auth-field-padding-y) var(--auth-field-padding-x);
+            font-size: var(--auth-field-font-size);
+            letter-spacing: 0.2px;
+        }
+        .authField input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+        #authUsernameField { display: flex; }
+        #authButtonRow {
+            position: absolute;
+            top: var(--auth-buttons-top);
+            left: var(--auth-buttons-left);
+            display: flex;
+            gap: var(--auth-button-gap);
+        }
         #authPrimaryBtn, #authToggleBtn, #logoutBtn {
             border: none; border-radius: 8px; cursor: pointer; font-weight: bold;
         }
-        #authPrimaryBtn { width: 100%; margin-top: 8px; padding: 12px 16px; background: #4ade80; color: #012; font-size: 16px; }
-        #authPrimaryBtn:disabled { opacity: 0.6; cursor: not-allowed; }
-        #authToggleBtn { margin-top: 10px; width: 100%; padding: 10px 16px; background: #1f2937; color: #e5e7eb; font-size: 13px; }
-        #authStatus { min-height: 18px; margin-top: 12px; color: #f8fafc; font-size: 13px; text-align: center; }
+        #authPrimaryBtn, #authToggleBtn {
+            width: var(--auth-button-width);
+            height: var(--auth-button-height);
+            background-color: transparent;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: transparent;
+            font-size: 0;
+            padding: 0;
+        }
+        #authPrimaryBtn { background-image: url('assets/signup/log_inbutton.png'); }
+        #authToggleBtn { background-image: url('assets/signup/sign_up_button.png'); }
+        #authPrimaryBtn:disabled, #authToggleBtn:disabled { opacity: 0.55; cursor: not-allowed; }
+        #authStatus {
+            position: absolute;
+            left: var(--auth-fields-left);
+            bottom: 34px;
+            width: var(--auth-field-width);
+            min-height: 20px;
+            color: #f8fafc;
+            font-size: 14px;
+            text-align: left;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+        }
         #accountPanel { position: absolute; top: 12px; right: 12px; display: flex; gap: 10px; align-items: center; z-index: 4; }
         #accountName { color: #fff; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.25); border-radius: 8px; padding: 8px 10px; font-size: 13px; }
         #logoutBtn { padding: 8px 12px; background: #4ade80; color: #012; font-size: 12px; }
@@ -167,20 +321,24 @@
         <div id="authCard">
             <h1 id="authTitle">RibaRun Access</h1>
             <p id="authSubtitle">Sign in to play and submit your survival time leaderboard score.</p>
-            <div class="authField" id="authUsernameField">
-                <label for="authUsernameInput">Username</label>
-                <input id="authUsernameInput" type="text" maxlength="20" autocomplete="username" placeholder="Choose a unique username">
+            <div id="authFieldsStack">
+                <div class="authField" id="authUsernameField">
+                    <label for="authUsernameInput">Username</label>
+                    <input id="authUsernameInput" type="text" maxlength="20" autocomplete="username" placeholder="Your username">
+                </div>
+                <div class="authField">
+                    <label for="authEmailInput">Email</label>
+                    <input id="authEmailInput" type="email" autocomplete="email" placeholder="you@example.com">
+                </div>
+                <div class="authField">
+                    <label for="authPasswordInput">Password</label>
+                    <input id="authPasswordInput" type="password" autocomplete="current-password" placeholder="••••••••">
+                </div>
             </div>
-            <div class="authField">
-                <label for="authEmailInput">Email</label>
-                <input id="authEmailInput" type="email" autocomplete="email" placeholder="you@example.com">
+            <div id="authButtonRow">
+                <button id="authPrimaryBtn" type="button" aria-label="Log in">LOG IN</button>
+                <button id="authToggleBtn" type="button" aria-label="Sign up">SIGN UP</button>
             </div>
-            <div class="authField">
-                <label for="authPasswordInput">Password</label>
-                <input id="authPasswordInput" type="password" autocomplete="current-password" placeholder="••••••••">
-            </div>
-            <button id="authPrimaryBtn">LOG IN</button>
-            <button id="authToggleBtn">Need an account? Sign up</button>
             <div id="authStatus"></div>
         </div>
     </div>
@@ -206,18 +364,30 @@
         </div>
     </div>
 
-    <div id="startOverlay">
-        <button id="playButton">START RUN</button>
-        <div id="countdown"></div>
+    <div id="tutorialOverlay">
+        <div id="tutorialWrapper">
+            <img id="tutorialImage" src="assets/tutorial/tut1.jpeg" alt="Tutorial">
+            <button id="tutorialNextButton">NEXT</button>
+        </div>
     </div>
+
+    <div id="startOverlay">
+        <div id="startWrapper">
+            <button id="startRunButton" class="startButton"></button>
+            <button id="customiseButton" class="startButton"></button>
+            <button id="settingsButton" class="startButton"></button>
+        </div>
+    </div>
+    <div id="countdown"></div>
 
     <div id="gameOverOverlay">
         <div id="gameOverWrapper">
             <img id="gameOverImage" src="assets/game-end/background_frame_1.PNG" alt="Game Over">
+            <div id="gameOverMessage"></div>
             <button id="btnLoan" class="gameOverButton"></button>
             <button id="btnSavings" class="gameOverButton"></button>
             <button id="btnRestart" class="gameOverButton"></button>
-            <img id="bankruptcyBadge" src="assets/game-end/bankruptcy.png" alt="Bankruptcy">
+            <img id="bankruptcyBadge" src="assets/game-end/bankruptcy.png" alt="">
         </div>
     </div>
     <div id="survivalOverlay">
@@ -265,6 +435,14 @@
         const militaryIcon = new Image(); militaryIcon.src = 'assets/icons/rocketlauncher.png';
         const kestrlIcon = new Image(); kestrlIcon.src = 'assets/icons/kestrl_card.png';
         const sadaqahIcon = new Image(); sadaqahIcon.src = 'assets/icons/Sadaqah.png';
+        const ribaMonsterFramePaths = [
+            'assets/ribamonster/ribamonster_1.png',
+            'assets/ribamonster/ribamonster_2.png',
+            'assets/ribamonster/ribamonster_3.png',
+            'assets/ribamonster/ribamonster_4.png',
+            'assets/ribamonster/ribamonster_5.png',
+            'assets/ribamonster/ribamonster_6.png'
+        ];
         const iconImages = [coinIcon, alcoholIcon, gamblingIcon, toxicIcon, militaryIcon, kestrlIcon, sadaqahIcon];
         let iconsReady = false;
         Promise.all(iconImages.map(img => {
@@ -280,10 +458,57 @@
         
         // Bird animation variables
         let birdFrameIndex = 0;
+        let ribaMonsterFrameIndex = 0;
         let monsterY = 300; // Starts in the middle lane
         const BIRD_FRAME_WIDTH = 200;
         const BIRD_TOTAL_FRAMES = 10;
         const BIRD_ANIMATION_SPEED = 0.15; // Frames per game loop iteration
+        const RIBA_MONSTER_ANIMATION_SPEED = 0.12;
+        const RIBA_MONSTER_DRAW_WIDTH = 208;
+        let ribaMonsterSpriteSheet = null;
+        let ribaMonsterFrameWidth = 0;
+        let ribaMonsterFrameHeight = 0;
+        let ribaMonsterTotalFrames = 0;
+
+        function loadRibaMonsterSpriteSheet() {
+            const framePromises = ribaMonsterFramePaths.map(path => new Promise(resolve => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => resolve(null);
+                img.src = path;
+            }));
+
+            Promise.all(framePromises).then(frames => {
+                const validFrames = frames.filter(Boolean);
+                if (!validFrames.length) return;
+
+                const sourceFrameWidth = validFrames[0].naturalWidth;
+                const sourceFrameHeight = validFrames[0].naturalHeight;
+                const scaledFrameWidth = RIBA_MONSTER_DRAW_WIDTH;
+                const scaledFrameHeight = Math.round((sourceFrameHeight / sourceFrameWidth) * scaledFrameWidth);
+                const spriteSheet = document.createElement('canvas');
+                spriteSheet.width = scaledFrameWidth * validFrames.length;
+                spriteSheet.height = scaledFrameHeight;
+
+                const sheetCtx = spriteSheet.getContext('2d');
+                validFrames.forEach((frame, index) => {
+                    sheetCtx.drawImage(
+                        frame,
+                        index * scaledFrameWidth,
+                        0,
+                        scaledFrameWidth,
+                        scaledFrameHeight
+                    );
+                });
+
+                ribaMonsterSpriteSheet = spriteSheet;
+                ribaMonsterFrameWidth = scaledFrameWidth;
+                ribaMonsterFrameHeight = scaledFrameHeight;
+                ribaMonsterTotalFrames = validFrames.length;
+            });
+        }
+
+        loadRibaMonsterSpriteSheet();
 
         // ==========================================
         //        THE GOD PANEL
@@ -853,15 +1078,18 @@
                     flyingCoins.splice(i, 1); // Remove when it lands
                 }
             }
-            if (runTimerRunning) {
+            const hasDebt = syncDebtState();
+            if (runTimerRunning && !hasDebt) {
                 const now = performance.now();
                 runElapsedMs += (now - runTimerLastMs);
                 runTimerLastMs = now;
                 runTimerEl.textContent = formatRunTime(runElapsedMs);
+            } else if (runTimerRunning) {
+                runTimerLastMs = performance.now();
             }
             // --- DEBT VISUALS ---
             // If we are in Riba Mode OR Liquidity is critical (< 0)
-            if (ribaMode || liquidity < 0) {
+            if (hasDebt || liquidity < 0) {
                 debtVignette.classList.add('active');
             } else {
                 debtVignette.classList.remove('active');
@@ -968,34 +1196,34 @@
 
             ctx.save();
             
-            // 3. THE EVENT HORIZON (Pulsing Glow)
-            // Glow expands/contracts with the surge
-            let pulseSize = 30 + Math.sin(frameCount * 0.05) * 10;
-            ctx.shadowBlur = pulseSize;
-            ctx.shadowColor = "rgba(128, 0, 128, 0.8)"; 
-            
-            // 4. THE VOID
-            ctx.fillStyle = "black";
-            ctx.beginPath();
-            ctx.arc(myX, monsterY, 55, 0, Math.PI * 2); // Use monsterY, NOT bird.y
-            ctx.fill();
+            // Draw animated monster from runtime-built sprite sheet.
+            if (ribaMonsterSpriteSheet && ribaMonsterTotalFrames > 0) {
+                ribaMonsterFrameIndex += RIBA_MONSTER_ANIMATION_SPEED;
+                if (ribaMonsterFrameIndex >= ribaMonsterTotalFrames) {
+                    ribaMonsterFrameIndex = 0;
+                }
 
-            // 5. THE ACCRETION DISK (Ring)
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(myX, monsterY, 55, 0, Math.PI * 2);
-            ctx.stroke();
+                const currentFrame = Math.floor(ribaMonsterFrameIndex);
+                const spriteX = currentFrame * ribaMonsterFrameWidth;
 
-            // 6. THE LABEL ("RIBA") - STABLE
-            // No jitter. Just solid, ominous text.
-            ctx.shadowBlur = 0; 
-            ctx.fillStyle = "white";
-            ctx.font = "bold 24px Courier New";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            
-            ctx.fillText("RIBA", myX, monsterY);
+                ctx.drawImage(
+                    ribaMonsterSpriteSheet,
+                    spriteX,
+                    0,
+                    ribaMonsterFrameWidth,
+                    ribaMonsterFrameHeight,
+                    myX - ribaMonsterFrameWidth / 2,
+                    monsterY - ribaMonsterFrameHeight / 2,
+                    ribaMonsterFrameWidth,
+                    ribaMonsterFrameHeight
+                );
+            } else {
+                // Fallback if frames are missing or still loading.
+                ctx.fillStyle = "black";
+                ctx.beginPath();
+                ctx.arc(myX, monsterY, 55, 0, Math.PI * 2);
+                ctx.fill();
+            }
 
             ctx.restore();
         }
@@ -1063,6 +1291,7 @@
                         if (liquidity > 10) { 
                             liquidity -= 10; 
                             savings += 10; 
+                            syncDebtState();
                             
                             // TRIGGER VISUAL: Launch a coin!
                             flyingCoins.push(new TransferCoin());
@@ -1076,6 +1305,7 @@
         }
 
         const authOverlay = document.getElementById('authOverlay');
+        const authSubtitle = document.getElementById('authSubtitle');
         const authUsernameField = document.getElementById('authUsernameField');
         const authUsernameInput = document.getElementById('authUsernameInput');
         const authEmailInput = document.getElementById('authEmailInput');
@@ -1101,6 +1331,9 @@
         const introSkip = document.getElementById('introSkip');
         const introContinue = document.getElementById('introContinue');
         const mapOverlay = document.getElementById('mapOverlay');
+        const tutorialOverlay = document.getElementById('tutorialOverlay');
+        const tutorialImage = document.getElementById('tutorialImage');
+        const tutorialNextButton = document.getElementById('tutorialNextButton');
         
         // Start fading in continue button (0 to 1 over 30 seconds)
         let videoStartTime = Date.now();
@@ -1111,22 +1344,37 @@
             if (opacity >= 1) clearInterval(continueOpacityInterval);
         }, 100);
         const mapStartButton = document.getElementById('mapStartButton');
-        const playBtn = document.getElementById('playButton');
+        const playBtn = document.getElementById('startRunButton');
         const countDownEl = document.getElementById('countdown');
         const gameOverOverlay = document.getElementById('gameOverOverlay');
         const survivalOverlay = document.getElementById('survivalOverlay');
         const survivalTimeEl = document.getElementById('survivalTime');
         const runTimerEl = document.getElementById('runTimer');
-        const gameOverFrames = [
-            'assets/game-end/background_frame_1.PNG',
-            'assets/game-end/background_frame_2.PNG',
-            'assets/game-end/background_frame_3.PNG'
-        ];
+        const gameOverFramesBySavingsState = {
+            enough: [
+                'assets/game-end/enoughsavings1.png',
+                'assets/game-end/enoughsavings2.png'
+            ],
+            none: [
+                'assets/game-end/nosavings1.png',
+                'assets/game-end/nosavings2.png'
+            ]
+        };
         let gameOverFrameIndex = 0;
         let gameOverFrameTimer = null;
         let runElapsedMs = 0;
         let runTimerRunning = false;
         let runTimerLastMs = 0;
+        let startCountdownTimer = null;
+
+        function syncDebtState() {
+            const hasDebt = savings < 0;
+            ribaMode = hasDebt;
+            if (!hasDebt) {
+                ribaRound = 0;
+            }
+            return hasDebt;
+        }
 
         function normalizeUsername(name) {
             return (name || '').trim().replace(/\s+/g, '_').toLowerCase();
@@ -1158,11 +1406,10 @@
 
         function setAuthMode(mode) {
             authMode = mode;
-            const signup = authMode === 'signup';
-            authUsernameField.style.display = signup ? 'flex' : 'none';
-            authPrimaryBtn.textContent = signup ? 'SIGN UP' : 'LOG IN';
-            authToggleBtn.textContent = signup ? 'Already have an account? Log in' : 'Need an account? Sign up';
-            authPasswordInput.setAttribute('autocomplete', signup ? 'new-password' : 'current-password');
+            authUsernameField.style.display = 'flex';
+            authSubtitle.textContent = 'Use username, email, and password to log in, or create a new account.';
+            authUsernameInput.placeholder = 'Your username';
+            authPasswordInput.setAttribute('autocomplete', 'current-password');
             setAuthStatus('');
         }
 
@@ -1227,8 +1474,22 @@
             await loadLeaderboard();
         }
 
+        // Always call this before any authenticated Supabase operation.
+        // supabase.auth.getSession() auto-refreshes the JWT if it has expired,
+        // preventing stale-token failures after long play sessions.
+        async function refreshSession() {
+            if (!supabaseClient) return null;
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) currentSession = session;
+            return session;
+        }
+
         async function loadLeaderboard() {
             if (!supabaseClient) return;
+
+            // Refresh the token so the client has a valid JWT for the request,
+            // even for the public-readable table.
+            await refreshSession();
 
             setLeaderboardStatus('Loading leaderboard...');
             const { data, error } = await supabaseClient
@@ -1293,7 +1554,9 @@
         }
 
         async function submitBestScore(survivedMs) {
-            if (!supabaseClient || !currentSession?.user?.id) {
+            // Force a token refresh before attempting any write.
+            const session = await refreshSession();
+            if (!supabaseClient || !session?.user?.id) {
                 latestSubmitResult = { status: 'error' };
                 return latestSubmitResult;
             }
@@ -1302,73 +1565,93 @@
             scoreSubmittedForRun = true;
             setSubmitStatus('Submitting score...');
 
-            const ms = Math.max(0, Math.floor(survivedMs));
-            const { data: existing, error: readError } = await supabaseClient
-                .from('leaderboard_best')
-                .select('best_survived_ms')
-                .eq('user_id', currentSession.user.id)
-                .maybeSingle();
+            try {
+                const ms = Math.max(0, Math.floor(survivedMs));
+                const { data: existing, error: readError } = await supabaseClient
+                    .from('leaderboard_best')
+                    .select('best_survived_ms')
+                    .eq('user_id', currentSession.user.id)
+                    .maybeSingle();
 
-            if (readError) {
-                setSubmitStatus('Could not submit score.', true);
-                latestSubmitResult = { status: 'error' };
-                return latestSubmitResult;
-            }
+                if (readError) {
+                    throw readError;
+                }
 
-            if (existing && ms <= existing.best_survived_ms) {
+                if (existing && ms <= existing.best_survived_ms) {
+                    latestSubmitResult = {
+                        status: 'kept-best',
+                        survivedMs: ms,
+                        bestMs: existing.best_survived_ms
+                    };
+                    return latestSubmitResult;
+                }
+
+                const { error: upsertError } = await supabaseClient
+                    .from('leaderboard_best')
+                    .upsert({
+                        user_id: currentSession.user.id,
+                        username_snapshot: currentUsername || 'player',
+                        best_survived_ms: ms
+                    }, { onConflict: 'user_id' });
+
+                if (upsertError) {
+                    throw upsertError;
+                }
+
                 latestSubmitResult = {
-                    status: 'kept-best',
+                    status: 'new-best',
                     survivedMs: ms,
-                    bestMs: existing.best_survived_ms
+                    bestMs: ms
                 };
                 return latestSubmitResult;
-            }
-
-            const { error: upsertError } = await supabaseClient
-                .from('leaderboard_best')
-                .upsert({
-                    user_id: currentSession.user.id,
-                    username_snapshot: currentUsername,
-                    best_survived_ms: ms
-                }, { onConflict: 'user_id' });
-
-            if (upsertError) {
+            } catch (_error) {
                 setSubmitStatus('Could not submit score.', true);
+                scoreSubmittedForRun = false;
                 latestSubmitResult = { status: 'error' };
                 return latestSubmitResult;
             }
-
-            latestSubmitResult = {
-                status: 'new-best',
-                survivedMs: ms,
-                bestMs: ms
-            };
-            return latestSubmitResult;
         }
 
         async function processSurvivalSummary() {
-            survivalContinueBtn.style.display = 'none';
-            const result = await submitBestScore(pendingSurvivalMs);
-
-            if (!result || result.status === 'error') {
-                setSubmitStatus('Could not check your best time.');
-            }
-            else if (result.status === 'new-best') {
-                setSubmitStatus(`Well done! ${formatRunTime(result.bestMs)} is your best time.`);
-            }
-            else {
-                setSubmitStatus(`Survived ${formatRunTime(result.survivedMs)}\nYour best time is ${formatRunTime(result.bestMs)}.`);
-            }
-
+            // Always let the player continue even if leaderboard submit is slow.
             survivalContinueBtn.style.display = 'inline-block';
+            survivalContinueBtn.disabled = true;
+
+            try {
+                const result = await Promise.race([
+                    submitBestScore(pendingSurvivalMs),
+                    new Promise(resolve => setTimeout(() => resolve({ status: 'timeout' }), 8000))
+                ]);
+
+                if (!result || result.status === 'error' || result.status === 'timeout') {
+                    setSubmitStatus('Could not check your best time.');
+                }
+                else if (result.status === 'new-best') {
+                    setSubmitStatus(`Well done! ${formatRunTime(result.bestMs)} is your best time.`);
+                }
+                else {
+                    setSubmitStatus(`Survived ${formatRunTime(result.survivedMs)}\nYour best time is ${formatRunTime(result.bestMs)}.`);
+                }
+            } catch (_error) {
+                setSubmitStatus('Could not check your best time.');
+            } finally {
+                survivalContinueBtn.style.display = 'inline-block';
+                survivalContinueBtn.disabled = false;
+            }
         }
 
         async function handleLogin() {
+            const username = authUsernameInput.value.trim();
             const email = authEmailInput.value.trim();
             const password = authPasswordInput.value;
 
+            if (!isUsernameValid(username)) {
+                setAuthStatus('Enter your username (3-20 letters, numbers, underscore).', true);
+                return;
+            }
+
             if (!email || !password) {
-                setAuthStatus('Enter your email and password.', true);
+                setAuthStatus('Enter your username, email, and password.', true);
                 return;
             }
 
@@ -1385,6 +1668,21 @@
 
             currentSession = data.session;
             const profile = await loadCurrentProfile();
+
+            if (!profile?.username) {
+                setAuthBusy(false);
+                await supabaseClient.auth.signOut();
+                enterSignedOutMode('Profile not found for this account. Contact support.');
+                return;
+            }
+
+            if (normalizeUsername(profile.username) !== normalizeUsername(username)) {
+                setAuthBusy(false);
+                await supabaseClient.auth.signOut();
+                enterSignedOutMode('Username does not match this email/password.');
+                return;
+            }
+
             currentUsername = profile?.username || (email.split('@')[0] || 'player');
             accountNameEl.textContent = `${currentUsername}`;
             setAuthStatus('');
@@ -1552,15 +1850,62 @@
         function showStartOverlay() {
             mapOverlay.style.display = 'none';
             startOverlay.style.display = 'flex';
+            if (startCountdownTimer) {
+                clearInterval(startCountdownTimer);
+                startCountdownTimer = null;
+            }
+            countDownEl.textContent = '';
+            countDownEl.classList.remove('active');
             resetRunTimer();
         }
+
+        let currentTutorialIndex = 0;
+        const tutorialSlides = [
+            'assets/tutorial/tut1.jpeg',
+            'assets/tutorial/tut2.jpeg',
+            'assets/tutorial/tut3.jpeg'
+        ];
+
+        function showTutorialSequence() {
+            mapOverlay.style.display = 'none';
+            tutorialOverlay.style.display = 'flex';
+            currentTutorialIndex = 0;
+            loadTutorialSlide();
+        }
+
+        function loadTutorialSlide() {
+            tutorialImage.style.animation = 'none';
+            void tutorialImage.offsetWidth;
+            tutorialImage.src = tutorialSlides[currentTutorialIndex];
+            tutorialImage.style.animation = 'fadeInTutorial 1.5s ease-in forwards';
+            
+            // Update button image
+            if (currentTutorialIndex === tutorialSlides.length - 1) {
+                tutorialNextButton.style.backgroundImage = "url('assets/tutorial/continue.png')";
+            } else {
+                tutorialNextButton.style.backgroundImage = "url('assets/tutorial/next.png')";
+            }
+        }
+
+        function advanceTutorial() {
+            if (currentTutorialIndex < tutorialSlides.length - 1) {
+                currentTutorialIndex++;
+                loadTutorialSlide();
+            } else {
+                // Tutorial complete, start the game
+                tutorialOverlay.style.display = 'none';
+                showStartOverlay();
+            }
+        }
+
+        tutorialNextButton.addEventListener('click', advanceTutorial);
 
         introProceedButton.addEventListener('click', () => {
             showMapScreen();
         });
 
         mapStartButton.addEventListener('click', () => {
-            showStartOverlay();
+            showTutorialSequence();
         });
 
         introPlayButton.addEventListener('click', () => {
@@ -1594,15 +1939,15 @@
                 setAuthStatus('Supabase is not configured.', true);
                 return;
             }
-            if (authMode === 'signup') {
-                await handleSignup();
-            } else {
-                await handleLogin();
-            }
+            await handleLogin();
         });
 
-        authToggleBtn.addEventListener('click', () => {
-            setAuthMode(authMode === 'signup' ? 'login' : 'signup');
+        authToggleBtn.addEventListener('click', async () => {
+            if (!supabaseClient) {
+                setAuthStatus('Supabase is not configured.', true);
+                return;
+            }
+            await handleSignup();
         });
 
         [authUsernameInput, authEmailInput, authPasswordInput].forEach(input => {
@@ -1653,17 +1998,26 @@
             }
             startOverlay.style.display = 'none';
             let count = 3;
-            countDownEl.innerText = count;
-            let timer = setInterval(() => {
+            countDownEl.textContent = count;
+            countDownEl.classList.add('active');
+            if (startCountdownTimer) {
+                clearInterval(startCountdownTimer);
+            }
+            startCountdownTimer = setInterval(() => {
                 count--;
-                if(count > 0) { countDownEl.innerText = count; } 
+                if(count > 0) {
+                    countDownEl.textContent = count;
+                } 
                 else {
-                    clearInterval(timer);
+                    clearInterval(startCountdownTimer);
+                    startCountdownTimer = null;
+                    countDownEl.textContent = '';
+                    countDownEl.classList.remove('active');
                     isPlaying = true;
                     startRunTimer();
                     loop();
                 }
-            }, 500);
+            }, 1000);
         });
 
         function triggerGameOver() {
@@ -1673,8 +2027,14 @@
             stopRunTimer();
             gameOverOverlay.style.display = 'flex';
             const gameOverImage = document.getElementById('gameOverImage');
+            const gameOverMessage = document.getElementById('gameOverMessage');
             const gameOverButtons = document.querySelectorAll('.gameOverButton, #bankruptcyBadge');
+            const hasSavings = savings >= 150;
+            const gameOverFrames = hasSavings
+                ? gameOverFramesBySavingsState.enough
+                : gameOverFramesBySavingsState.none;
             gameOverImage.classList.remove('fade-in');
+            gameOverMessage.classList.remove('fade-in');
             gameOverButtons.forEach(btn => btn.classList.remove('fade-in'));
             if (gameOverFrameTimer) {
                 clearInterval(gameOverFrameTimer);
@@ -1682,30 +2042,39 @@
             }
             gameOverFrameIndex = 0;
             gameOverImage.src = gameOverFrames[gameOverFrameIndex];
+            gameOverMessage.textContent = hasSavings
+                ? ''
+                : '';
             gameOverFrameTimer = setInterval(() => {
                 gameOverFrameIndex = (gameOverFrameIndex + 1) % gameOverFrames.length;
                 gameOverImage.src = gameOverFrames[gameOverFrameIndex];
             }, 240);
             setTimeout(() => {
                 gameOverImage.classList.add('fade-in');
+                gameOverMessage.classList.add('fade-in');
                 gameOverButtons.forEach(btn => btn.classList.add('fade-in'));
             }, 10);
             document.getElementById('btnLoan').onclick = () => {
                 liquidity = 100;
+                savings -= 100;
                 burnRate += 2; 
-                // ACTIVATE RIBA MODE
-                ribaMode = true;
-                ribaRound++; // Increase difficulty level
+                if (syncDebtState()) {
+                    ribaRound++;
+                }
                 resumeGame();
             };
             const btnSavings = document.getElementById('btnSavings');
-            const hasSavings = savings >= 150;
             btnSavings.disabled = !hasSavings;
             btnSavings.style.backgroundImage = hasSavings
-                ? "url('assets/game-end/usesavings.png')"
+                ? "url('assets/game-end/150savings.png')"
                 : "url('assets/game-end/nosavings.png')";
             btnSavings.onclick = () => {
-                if(savings >= 150) { savings -= 150; liquidity = 100; resumeGame(); }
+                if(savings >= 150) {
+                    savings -= 150;
+                    syncDebtState();
+                    liquidity = 100;
+                    resumeGame();
+                }
             };
             document.getElementById('btnRestart').onclick = () => {
                 pendingSurvivalMs = runElapsedMs;
@@ -1713,6 +2082,8 @@
                 survivalTimeEl.textContent = `SURVIVED ${formatRunTime(pendingSurvivalMs)}`;
                 survivalUserLineEl.textContent = `Username: ${currentUsername || 'player'}`;
                 setSubmitStatus('');
+                survivalContinueBtn.style.display = 'inline-block';
+                survivalContinueBtn.disabled = true;
                 scoreSubmittedForRun = false;
                 latestSubmitResult = null;
                 if (gameOverFrameTimer) {
@@ -1728,7 +2099,9 @@
         function resumeGame() {
             gameOverOverlay.style.display = 'none';
             const gameOverImage = document.getElementById('gameOverImage');
+            const gameOverMessage = document.getElementById('gameOverMessage');
             gameOverImage.classList.remove('fade-in');
+            gameOverMessage.classList.remove('fade-in');
             document.querySelectorAll('.gameOverButton, #bankruptcyBadge').forEach(btn => btn.classList.remove('fade-in'));
             if (gameOverFrameTimer) {
                 clearInterval(gameOverFrameTimer);
