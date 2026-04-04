@@ -374,20 +374,20 @@ async function initializeAuth() {
     enterSignedInMode();
 }
 
-authPrimaryBtn.addEventListener('click', async () => {
-    if (!supabaseClient) {
-        setAuthStatus('Supabase is not configured.', true);
-        return;
-    }
-    await handleLogin();
+authPrimaryBtn.addEventListener('click', () => {
+    const username = authUsernameInput.value.trim() || 'player';
+    currentUsername = username;
+    currentSession = { user: { id: 'local' } };
+    accountNameEl.textContent = username;
+    enterSignedInMode();
 });
 
-authToggleBtn.addEventListener('click', async () => {
-    if (!supabaseClient) {
-        setAuthStatus('Supabase is not configured.', true);
-        return;
-    }
-    await handleSignup();
+authToggleBtn.addEventListener('click', () => {
+    const username = authUsernameInput.value.trim() || 'player';
+    currentUsername = username;
+    currentSession = { user: { id: 'local' } };
+    accountNameEl.textContent = username;
+    enterSignedInMode();
 });
 
 [authUsernameInput, authEmailInput].forEach(input => {    
@@ -423,4 +423,4 @@ survivalContinueBtn.addEventListener('click', () => {
 });
 
 setAuthMode('login');
-initializeAuth();
+enterSignedOutMode('Log in to play.');
