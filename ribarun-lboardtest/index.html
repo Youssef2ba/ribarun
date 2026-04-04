@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RibaRun - Industrial Chaos</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+
+    <canvas id="gameCanvas" width="897" height="600"></canvas>
+
+    <div id="authOverlay">
+        <div id="authCard">
+            <h1 id="authTitle">RibaRun Access</h1>
+            <p id="authSubtitle">Sign in to play and submit your survival time leaderboard score.</p>
+            <div id="authFieldsStack">
+                <div class="authField" id="authUsernameField">
+                    <label for="authUsernameInput">Username</label>
+                    <input id="authUsernameInput" type="text" maxlength="20" autocomplete="username" placeholder="Your username">
+                </div>
+                <div class="authField">
+                    <label for="authEmailInput">Email</label>
+                    <input id="authEmailInput" type="email" autocomplete="email" placeholder="you@example.com">
+                </div>
+            </div>
+            <div id="authButtonRow">
+                <button id="authPrimaryBtn" type="button" aria-label="Log in">LOG IN</button>
+                <button id="authToggleBtn" type="button" aria-label="Sign up">SIGN UP</button>
+            </div>
+            <div id="authStatus"></div>
+        </div>
+    </div>
+
+    <div id="introOverlay">
+        <div id="introWrapper">
+            <iframe id="introVideo" src="https://streamable.com/e/tmrbbx" frameborder="0" scrolling="no" allowfullscreen style="width:100%; height:100%; display:block;"></iframe>
+            <button id="introPlayButton" style="display:none;"></button>
+            <button id="introProceedButton">PROCEED</button>
+            <button id="introSkip">SKIP</button>
+            <button id="introContinue">CONTINUE</button>
+        </div>
+    </div>
+
+    <div id="mapOverlay">
+        <div id="mapWrapper">
+            <img id="mapImage" src="assets/map/main_map.PNG" alt="Game Map">
+            <div id="accountPanel">
+                <div id="accountName"></div>
+                <button id="logoutBtn">LOG OUT</button>
+            </div>
+            <button id="mapStartButton">START RUN</button>
+        </div>
+    </div>
+
+    <div id="tutorialOverlay">
+        <div id="tutorialWrapper">
+            <img id="tutorialImage" src="assets/tutorial/tut1.jpeg" alt="Tutorial">
+            <button id="tutorialNextButton">NEXT</button>
+        </div>
+    </div>
+
+    <div id="startOverlay">
+        <div id="startWrapper">
+            <button id="startRunButton" class="startButton"></button>
+            <button id="customiseButton" class="startButton"></button>
+            <button id="settingsButton" class="startButton"></button>
+        </div>
+    </div>
+    <div id="countdown"></div>
+
+    <div id="gameOverOverlay">
+        <div id="gameOverWrapper">
+            <img id="gameOverImage" src="assets/game-end/background_frame_1.PNG" alt="Game Over">
+            <div id="gameOverMessage"></div>
+            <button id="btnLoan" class="gameOverButton"></button>
+            <button id="btnSavings" class="gameOverButton"></button>
+            <button id="btnRestart" class="gameOverButton"></button>
+            <img id="bankruptcyBadge" src="assets/game-end/bankruptcy.png" alt="">
+        </div>
+    </div>
+    <div id="survivalOverlay">
+        <div id="survivalTime">SURVIVED 00:00</div>
+        <div id="survivalUserLine"></div>
+        <div id="survivalSubmitStatus"></div>
+        <button id="survivalContinueBtn">CONTINUE</button>
+    </div>
+    <div id="leaderboardOverlay">
+        <div id="leaderboardWrapper">
+            <div id="leaderboardTitle">Leaderboard</div>
+            <ol id="leaderboardList"></ol>
+            <div id="leaderboardStatus"></div>
+            <div id="leaderboardActionRow">
+                <button id="leaderboardLogoutBtn">LOG OUT</button>
+                <button id="replayGameBtn">REPLAY GAME</button>
+            </div>
+        </div>
+    </div>
+    <div id="debtVignette"></div>
+    <div id="runTimer" class="hidden">00:00</div>
+    <img id="timerLock" class="hidden" src="assets/timer-lock/lock.png" alt="Timer lock">
+    <img id="timerInstruction" class="hidden" src="assets/timer-lock/instruction.png" alt="Timer instruction">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
+
+
+
