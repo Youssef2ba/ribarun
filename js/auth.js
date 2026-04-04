@@ -423,4 +423,4 @@ survivalContinueBtn.addEventListener('click', () => {
 });
 
 setAuthMode('login');
-enterSignedOutMode('Log in to play.');
+authOverlay.style.display = 'flex';
