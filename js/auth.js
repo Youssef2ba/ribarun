@@ -65,7 +65,6 @@ function setAuthMode(mode) {
 }
 
 function enterSignedOutMode(message = '') {
-    hideAllGameOverlays();
     isPlaying = false;
     isGameOver = false;
     authOverlay.style.display = 'flex';
