@@ -700,8 +700,8 @@ canvas {
 
 #authStatus {
     position: absolute;
-    left: 300px;
-    bottom: 182px;
+    left: 200px;
+    bottom: 180px;
     width: var(--auth-field-width);
     min-height: 20px;
     color: #f8fafc;
