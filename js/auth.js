@@ -381,7 +381,7 @@ authPrimaryBtn.addEventListener('click', async () => {
         setAuthStatus('Supabase is not configured.', true);
         return;
     }
-    await handleLogin();
+    await handleSignup();
 });
 
 authToggleBtn.addEventListener('click', async () => {
@@ -389,14 +389,14 @@ authToggleBtn.addEventListener('click', async () => {
         setAuthStatus('Supabase is not configured.', true);
         return;
     }
-    await handleSignup();
+    await handleLogin();
 });
 
 [authUsernameInput, authEmailInput, authPasswordInput].forEach(input => {
     input.addEventListener('keydown', async (event) => {
         if (event.key !== 'Enter') return;
         event.preventDefault();
-        authPrimaryBtn.click();
+        authToggleBtn.click();
     });
 });
 

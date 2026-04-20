@@ -568,8 +568,8 @@ canvas {
 
 #authCard {
     /* Adjust these to move and resize the 3 stacked input boxes */
-    --auth-fields-top: 270px;
-    --auth-fields-left: 375px;
+    --auth-fields-top: 240px;
+    --auth-fields-left: 335px;
     --auth-field-width: 350px;
     --auth-field-gap: 17px;
     --auth-field-height: 32px;
@@ -578,11 +578,11 @@ canvas {
     --auth-field-padding-x: 12px;
 
     /* Adjust these to move the login/signup image buttons */
-    --auth-buttons-top: 418px;
-    --auth-buttons-left: 258px;
-    --auth-button-width: 182px;
-    --auth-button-height: 56px;
-    --auth-button-gap: 16px;
+    --auth-buttons-top: 430px;
+    --auth-buttons-left: 410px;
+    --auth-button-width: 150px;
+    --auth-button-height: 50px;
+    --auth-button-gap: 40px;
 
     position: relative;
     width: 897px;
